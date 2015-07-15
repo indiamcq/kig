@@ -43,7 +43,6 @@ if not defined projnumb if exist "%kigsitelookup%" call :lookup %site% "%kigsite
 if defined lookupreturn set projnumb=%lookupreturn%
 if defined lookupreturn echo Site number for %site% set to: %lookupreturn%
 if not exist "%kiginifile%" copy "%inifile%" "%kiginifile%"
-set getline=%site%
 
 rem make sure variables are set
 if not defined site echo usage with parameters: kig iso_site_code gallery_id style_number [site_number] &echo.
@@ -423,22 +422,6 @@ if "%count%" == "0" (
         goto :eof
     )
 )
-@echo off
-goto :eof
-
-:testserver
-if "%server%" == "production" (
-ping Hybridsecurely.net > "%kigprogramdata%\pingmatchbook.txt"
-call :getline 3 "%kigprogramdata%\pingmatchbook.txt"
-if "%getline%" == "Request timed out." set server=matchbook
-
-) else (
-ping %matchbookip% > "%kigprogramdata%\pingmatchbook.txt"
-call :getline 3 "%kigprogramdata%\pingmatchbook.txt"
-if "%getline%" == "Request timed out." set server=production
-)
-copy /y "%startpath%\files\%server%-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
-echo Server set to: %server%
 goto :eof
 
 :getserver
