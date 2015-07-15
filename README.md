@@ -9,7 +9,7 @@ Open a command prompt at the folder where the gallery photos resides on your com
 Either type in kig and answer the question prompts or type in:
 kig iso_site_code gallery_id style_number [site_number]
 
-#### Example 1
+##### Example 1
 ```
 kig ify artifacts 1 222
 ```
@@ -17,13 +17,30 @@ the above is where you know the site_number.
 
 If you have the site-lookup.txt file in the c:\ProgramData\kig folder with the data in, you do not need the fourth parameter.
 
-#### Example 2
+##### Example 2
 ```
 kig ify artifacts 1
 ```
 
 The resized files are named:
 gallery-gallery_id_01.jpg and gallery-gallery_id_01_thumb.jpg
+
+```
+C:\Users\username\Pictures\images-for-gallery>kig xxx river 1
+
+Making HTML and resized photos and thumbnails for K Image gallery.
+
+What is the project number?
+Enter number or leave blank for site code: 44
+----- make large size and thumb with no borders -----
+made gallery-river_01.jpg and gallery-river_01_thumb.jpg
+made gallery-river_02.jpg and gallery-river_02_thumb.jpg
+made gallery-river_03.jpg and gallery-river_03_thumb.jpg
+made gallery-river_04.jpg and gallery-river_04_thumb.jpg
+Finished!
+```
+
+
 
 All JPG output is created in a subfolder called readytoupload. The HTML file html.txt is opened in notepad. That file is in the same folder as the source files.
 
