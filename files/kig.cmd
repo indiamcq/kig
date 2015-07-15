@@ -40,9 +40,9 @@ if not exist "%kiginifile%" copy "%inifile%" "%kiginifile%"
 
 rem make sure variables are set
 if not defined site echo usage with parameters: kig iso_site_code gallery_id style_number [site_number] &echo.
-if not defined site echo You must specify a Project code.&set /P site=Enter Project code:
+if not defined site echo You must specify a Project code.&set /P site=Enter Project code: 
 if not defined galleryname echo How do you want to distinguish this gallery from other galleries?&set /P galleryname=Gallery name or code: 
-if not defined style echo What style do you want for the pictures?&set /P style=Choose theme number 1 or 2 or 3 or 0 for use with FastStone. Blank = 1:
+if not defined style echo What style do you want for the pictures?&set /P style=Choose theme number 1 or 2 or 3 or 0 for use with FastStone. Blank = 1: 
 if not defined projnumb echo What is the project number?&set /P projnumb=Enter number or leave blank for site code: 
 if not defined style set style=1
 set getline=%site%
