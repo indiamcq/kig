@@ -1,7 +1,7 @@
 # kig
 K Image Gallery builder tool
 
-KIG is a command line tool.
+KIG is a Windows command line tool.
 
 Open a command prompt at the folder where the gallery photos resides on your computer. (To open a command prompt at the folder, select the folder with the mouse, then hold down shift and right mouse click and select Open command window here.)
 
