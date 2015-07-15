@@ -10,6 +10,7 @@ Open a command prompt at the folder where the gallery photos resides on your com
 
 Type in **kig** in the command window and answer the question prompts.
 
+---
 ````
 C:\images-for-gallery>kig
 
@@ -32,6 +33,7 @@ made gallery-river_03.jpg and gallery-river_03_thumb.jpg
 made gallery-river_04.jpg and gallery-river_04_thumb.jpg
 Finished!
 ````
+---
 
 #### Option 2 type in all parameters `*kig xxx river 1 444*`
 
