@@ -1,0 +1,8 @@
+Installation notes for install-kig.cmd
+========================================
+
+Right click on the install-kig.cmd file and select "Run as administrator"
+
+If you have Irfanview and FastStone Photo Resizer installed it should finish with no warning messages warning messages.
+
+It can be reinstalled to update.
