@@ -6,7 +6,7 @@ KIG is a Windows command line tool.
 ### How to use
 Open a command prompt at the folder where the gallery photos resides on your computer. (To open a command prompt at the folder, select the folder with the mouse, then hold down shift and right mouse click and select Open command window here.)
 
-#### Option 1 type just **kig** and **enter**
+#### Option 1 type just *kig* and **enter**
 
 Type in **kig** in the command window and answer the question prompts.
 
@@ -33,7 +33,7 @@ made gallery-river_04.jpg and gallery-river_04_thumb.jpg
 Finished!
 ````
 
-#### Option 2 type in all parameters **kig xxx river 1 444**
+#### Option 2 type in all parameters *kig xxx river 1 444*
 
 Where 
 - **kig** is the program name,
