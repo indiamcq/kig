@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 rem usage: kig iso_site_code gallery_id style_number [site_number]
 rem must be started from folder with photos for inclusion in image gallery
 rem can also be started with just kig. Then answer prompts.
@@ -7,6 +7,8 @@ echo.
 echo Making HTML and resized photos and thumbnails for K Image gallery.
 echo.
 rem the following shoud not need editing
+if not defined server set server=matchbook
+set mathbookip=192.16.10.253
 set kigpath=C:\Programs\kig
 set setcontrol=%kigpath%\SetTextInControl.exe
 set sendtext=%kigpath%\SendText.exe
@@ -14,9 +16,13 @@ set controlclickxy=%kigpath%\ControlClickxy.exe
 set controlclick=%kigpath%\ControlClick.exe
 set sendtextcontrol=%kigpath%\SendTexttoControl.exe      
 set inifile=C:\Users\%USERNAME%\AppData\Roaming\IrfanView\i_view32.ini
-set kiginifile=C:\ProgramData\kig\i_view32.ini
-set kigsitelookup=C:\ProgramData\kig\site-lookup.txt
+set kigprogramdata=C:\ProgramData\kig
+set kiginifile=%kigprogramdata%\i_view32.ini
+set kigsitelookup=%kigprogramdata%\site-lookup.txt
 set outpath=%cd%\readytoupload
+if not defined server call :getserver
+if defined server copy /y "%kigprogramdata%\%server%-site-lookup.txt" "%kigprogramdata%\site-lookup.txt"
+echo Server set to %server%
 if exist "C:\Program Files (x86)" (
   set irfanview="C:\Program Files (x86)\IrfanView\i_view32.exe"
   set fsr="C:\Program Files (x86)\FastStone Photo Resizer\FSResizer.exe"
@@ -37,6 +43,7 @@ if not defined projnumb if exist "%kigsitelookup%" call :lookup %site% "%kigsite
 if defined lookupreturn set projnumb=%lookupreturn%
 if defined lookupreturn echo Site number for %site% set to: %lookupreturn%
 if not exist "%kiginifile%" copy "%inifile%" "%kiginifile%"
+set getline=%site%
 
 rem make sure variables are set
 if not defined site echo usage with parameters: kig iso_site_code gallery_id style_number [site_number] &echo.
@@ -45,12 +52,11 @@ if not defined galleryname echo How do you want to distinguish this gallery from
 if not defined style echo What style do you want for the pictures?&set /P style=Choose theme number 1 or 2 or 3 or 0 for use with FastStone. Blank = 1: 
 if not defined projnumb echo What is the project number?&set /P projnumb=Enter number or leave blank for site code: 
 if not defined style set style=1
-set getline=%site%
 if not defined galleryname set galleryname=1
 if not exist %irfanview% echo %irfanview% was not found.&echo Only the HTML will be created.&echo You will have to create the files manually!
 if not exist %fsr% echo %fsr% was not found.&echo Only the HTML will be created.&echo You will have to create the files manually!
 if exist "%cd%\readytoupload\*.jpg" del "%cd%\readytoupload\*.jpg"
-rem HYML
+rem HTML
 echo ^<script type="text/javascript" src="/sites/default/files/media/%projnumb%/imageGallery.js"^>^</script^> > html.txt
 echo ^<p^>About these photos^</p^> >> html.txt
 echo ^<div class="image-gallery"^> >> html.txt
@@ -398,47 +404,44 @@ FOR /F "tokens=1,2 delims==" %%i IN (%datafile%) DO @IF %%i EQU %findval% SET lo
 rem @echo %lookupreturn%
 goto :eof
 
-:scrap
-if exist %irfanview% call %irfanview% /killmesoftly
-call setini "%inifile%" Batch AdvCanvas 1
-call setini "%inifile%" Effects CanvL -10
-call setini "%inifile%" Effects CanvR -10
-call setini "%inifile%" Effects CanvT -10
-call setini "%inifile%" Effects CanvB -10
-call setini "%inifile%" Effects CanvColor 16777215
-set thumb=
-set options=/resize_long=1024 /resample /aspectratio /jpgq=70 /advancedbatch 
-FOR /F " delims=" %%s IN ('dir /b *.jpg') DO set curfile=%%s &call :processfile
-got :eof
-
-:style2old
-echo waiting for you to click on the Advanced Options button
-:: wait for user to open Avanced dialogue
-:: click on the Load options from file button
-rem call "%controlclick%" "Advanced Options" "[CLASS:TbsSkinButton; INSTANCE:3]"
-:: put in pathe and file name
-call "%sendtextcontrol%" "Open" "%ccfpath%\full_style%style%.ccf{enter}"
-:: close Advanced Options
-call "%controlclick%" "Advanced Options" "[CLASS:TbsSkinButton; INSTANCE:7]"
-call "%controlclick%" "%fspr%" "[CLASS:TbsSkinButton; INSTANCE:5]"
-
-echo Next set thumb file output
-pause
-call "%setcontrol%" "%fspr%" "[CLASS:TbsCustomEdit; INSTANCE:1]" ""
-call "%sendtextcontrol%" "%fspr%" "[CLASS:TbsCustomEdit; INSTANCE:1]" "gallery-%galleryname%{#}{#}_thumb"
-echo waiting for you to click on the Advanced Options button
-:: wait for user to open Avanced dialogue
-:: click on the Load options from file button
-rem call "%controlclick%" "Advanced Options" "[CLASS:TbsSkinButton; INSTANCE:3]"
-:: put in pathe and file name
-call "%sendtextcontrol%" "Open" "[CLASS:TEdit; INSTANCE:1]" "%ccfpath%\thumb_style%style%.ccf{enter}"
-:: close Advanced Options
-call "%controlclick%" "Advanced Options" "[CLASS:TbsSkinButton; INSTANCE:7]"
-echo off
-if exist "%cd%\proj-number.txt" (
-call getline 1 "%cd%\proj-number.txt"
+:getline
+:: Description: Get a specific line from a file
+:: Class: command - internal
+:: Required parameters:
+:: linetoget
+:: file
+if defined echogetline echo on
+set /A count=%~1-1
+if "%count%" == "0" (
+    for /f %%i in (%~2) do (
+        set getline=%%i
+        goto :eof
+    )
 ) else (
-set getline=%site%
+    for /f "skip=%count% " %%i in (%~2) do (
+        set getline=%%i
+        goto :eof
+    )
 )
+@echo off
+goto :eof
 
+:testserver
+if "%server%" == "production" (
+ping Hybridsecurely.net > "%kigprogramdata%\pingmatchbook.txt"
+call :getline 3 "%kigprogramdata%\pingmatchbook.txt"
+if "%getline%" == "Request timed out." set server=matchbook
+
+) else (
+ping %matchbookip% > "%kigprogramdata%\pingmatchbook.txt"
+call :getline 3 "%kigprogramdata%\pingmatchbook.txt"
+if "%getline%" == "Request timed out." set server=production
+)
+copy /y "%startpath%\files\%server%-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
+echo Server set to: %server%
+goto :eof
+
+:getserver
+call :getline 1 "%kigprogramdata%\server.txt"
+set server=%getline%
 goto :eof

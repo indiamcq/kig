@@ -8,8 +8,9 @@ Open a command prompt at the folder where the gallery photos resides on your com
 
 #### Option 1 type just `kig` and press *[enter]*
 
-Type in **kig** in the command window and answer the question prompts.
+Type in `kig` in the command window and answer the question prompts.
 
+##### Example: Sample of output from typing `kig`
 ---
 ````
 C:\images-for-gallery>kig
@@ -37,21 +38,14 @@ Finished!
 
 #### Option 2 type in all parameters `kig xxx river 1 444`
 
-Where 
+The full command line `kig` `iso_site_code` `gallery_id` `style_number` [`site_number`] and annotated below. 
 - **kig** is the program name,
 - **xxx** is the site code often the ISO code,
 - **1** is the style type
 - **444** is the site number associated with the iso_site_code
 
-or 
 
----
-````
-kig iso_site_code gallery_id style_number [site_number]
-````
----
-
-##### Example 1 Command line with all parameters
+##### Example: Command line with all parameters
 ---
 ```
 kig xxx artifacts 1 222
@@ -59,9 +53,9 @@ kig xxx artifacts 1 222
 ---
 The above example is where you know the site_number.
 
-If you have the site-lookup.txt file in the c:\ProgramData\kig folder with the relevant data in, you do not need the fourth parameter.
+If you have the `site-lookup.txt` file in the `c:\ProgramData\kig` folder with the relevant data in (a line with `xxx=444`), you do not need the fourth parameter.
 
-##### Example 2 Command line with three parameters
+##### Example: Command line with three parameters (preferred)
 ---
 ```
 kig ify artifacts 1
@@ -71,6 +65,7 @@ kig ify artifacts 1
 The resized files are named:
 gallery-gallery_id_01.jpg and gallery-gallery_id_01_thumb.jpg
 
+##### Example: Output from typing the three parameter command line
 ---
 ```
 C:\images-for-gallery>kig xxx river 1
@@ -91,6 +86,7 @@ Finished!
 
 All JPG output is created in a subfolder called readytoupload. The HTML file html.txt is opened in notepad. That file is in the same folder as the source files.
 
+##### Example: The output HTML for four input files
 ---
 ```
 <script type="text/javascript" src="/sites/default/files/media/44/imageGallery.js"></script> 
