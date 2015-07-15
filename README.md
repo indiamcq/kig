@@ -31,8 +31,11 @@ All JPG output is created in a subfolder called readytoupload. The HTML file htm
 Installation notes for install-kig.cmd
 Unzip the ImageGallery.zip
 Right click on the install-kig.cmd file and select "Run as administrator"
+
 ![Run as Administrator](/photos/RunAsAdmin.GIF)
+
 Click Yes to the User Account Control.
+
 ![Run as Administrator](/photos/UserAccountControl.GIF)
 
 If you have Irfanview and FastStone Photo Resizer installed, it should finish with no warning messages. 
