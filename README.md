@@ -31,7 +31,9 @@ Right click on the install-kig.cmd file and select "Run as administrator"
  
 Click Yes to the User Account Control.
 
-If you have Irfanview installed it should finish with no warning messages.
+If you have Irfanview and FastStone Photo Resizer installed, it should finish with no warning messages. 
+Without Irfanview the HTML will still be generated but no files resized. While FastStone Photo Resizer is only used in style 0.
+
 
 ### Reinstallation
 Simply rerun the installer by double clicking the installer. Reinstall does not need the "Run as Administrator" option.
