@@ -39,7 +39,7 @@ if not exist "%startpath%\files\server.txt" copy /y "%startpath%\files\server.tx
 if exist "%kigpath%\kig.cmd" call :echolog "kig.cmd installed"
 if not exist "%kigpath%\kig.cmd" call :echolog "CRITICAL ERROR. kig.cmd not found."
 if not exist "%kigpath%\kig.cmd" set critical=critical
-set /P server=Enter "y"" if you want to use Matchbook site number lookup: 
+set /P server=Enter "y" if you want to use Matchbook site number lookup: 
 if "%server%" == "y" copy /y "%startpath%\files\matchbook-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
 if "%server%" == "y" echo You will need to edit the C:\ProgramData\kig\site-lookup.txt file for the matchbook server you are using.
 if "%server%" neq "y" if exist "C:\ProgramData\kig\production-site-lookup.txt" copy /y "%startpath%\files\production-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
