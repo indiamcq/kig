@@ -6,7 +6,7 @@ KIG is a Windows command line tool.
 ### How to use
 Open a command prompt at the folder where the gallery photos resides on your computer. (To open a command prompt at the folder, select the folder with the mouse, then hold down shift and right mouse click and select Open command window here.)
 
-#### Option 1 type just `*kig*` and *[enter]*
+#### Option 1 type just `kig` and press *[enter]*
 
 Type in **kig** in the command window and answer the question prompts.
 
@@ -35,7 +35,7 @@ Finished!
 ````
 ---
 
-#### Option 2 type in all parameters `*kig xxx river 1 444*`
+#### Option 2 type in all parameters `kig xxx river 1 444`
 
 Where 
 - **kig** is the program name,
@@ -45,26 +45,33 @@ Where
 
 or 
 
+---
 ````
 kig iso_site_code gallery_id style_number [site_number]
 ````
+---
 
 ##### Example 1 Command line with all parameters
+---
 ```
 kig xxx artifacts 1 222
 ```
-the above is where you know the site_number.
+---
+The above example is where you know the site_number.
 
-If you have the site-lookup.txt file in the c:\ProgramData\kig folder with the data in, you do not need the fourth parameter.
+If you have the site-lookup.txt file in the c:\ProgramData\kig folder with the relevant data in, you do not need the fourth parameter.
 
 ##### Example 2 Command line with three parameters
+---
 ```
 kig ify artifacts 1
 ```
+---
 
 The resized files are named:
 gallery-gallery_id_01.jpg and gallery-gallery_id_01_thumb.jpg
 
+---
 ```
 C:\images-for-gallery>kig xxx river 1
 
@@ -78,11 +85,13 @@ made gallery-river_03.jpg and gallery-river_03_thumb.jpg
 made gallery-river_04.jpg and gallery-river_04_thumb.jpg
 Finished!
 ```
+---
 
 
 
 All JPG output is created in a subfolder called readytoupload. The HTML file html.txt is opened in notepad. That file is in the same folder as the source files.
 
+---
 ```
 <script type="text/javascript" src="/sites/default/files/media/44/imageGallery.js"></script> 
 <p>About these photos</p> 
@@ -102,6 +111,7 @@ src="/sites/default/files/media/xxx/gallery-river_04_thumb.jpg" style="width: 21
 /></a>&nbsp; 
 </div> 
 ```
+---
 
 
 ### Installation
