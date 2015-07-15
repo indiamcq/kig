@@ -1,4 +1,5 @@
-rem @echo off
+@echo off
+if "%2" == "debug" echo on
 rem usage: kig iso_site_code gallery_id style_number [site_number]
 rem must be started from folder with photos for inclusion in image gallery
 rem can also be started with just kig. Then answer prompts.
