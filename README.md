@@ -6,10 +6,12 @@ KIG is a Windows command line tool.
 ### How to use
 Open a command prompt at the folder where the gallery photos resides on your computer. (To open a command prompt at the folder, select the folder with the mouse, then hold down shift and right mouse click and select Open command window here.)
 
-Either type in kig and answer the question prompts or type in:
+#### Option 1
+
+Either type in +kig and answer the question prompts or type in:
 kig iso_site_code gallery_id style_number [site_number]
 
-##### Example 1
+##### Example 1 Command line with all parameters
 ```
 kig ify artifacts 1 222
 ```
@@ -17,7 +19,7 @@ the above is where you know the site_number.
 
 If you have the site-lookup.txt file in the c:\ProgramData\kig folder with the data in, you do not need the fourth parameter.
 
-##### Example 2
+##### Example 2 Command line with three parameters
 ```
 kig ify artifacts 1
 ```
@@ -43,6 +45,27 @@ Finished!
 
 
 All JPG output is created in a subfolder called readytoupload. The HTML file html.txt is opened in notepad. That file is in the same folder as the source files.
+
+```
+<script type="text/javascript" src="/sites/default/files/media/44/imageGallery.js"></script> 
+<p>About these photos</p> 
+<div class="image-gallery"> 
+<a  
+href="/sites/default/files/media/xxx/gallery-river_01.jpg"><img alt="" 
+src="/sites/default/files/media/xxx/gallery-river_01_thumb.jpg" style="width: 215px; height: 162px !important;" 
+/></a>&nbsp;<a  
+href="/sites/default/files/media/xxx/gallery-river_02.jpg"><img alt="" 
+src="/sites/default/files/media/xxx/gallery-river_02_thumb.jpg" style="width: 215px; height: 162px !important;" 
+/></a>&nbsp;<a  
+href="/sites/default/files/media/xxx/gallery-river_03.jpg"><img alt="" 
+src="/sites/default/files/media/xxx/gallery-river_03_thumb.jpg" style="width: 215px; height: 162px !important;" 
+/></a>&nbsp;<a  
+href="/sites/default/files/media/xxx/gallery-river_04.jpg"><img alt="" 
+src="/sites/default/files/media/xxx/gallery-river_04_thumb.jpg" style="width: 215px; height: 162px !important;" 
+/></a>&nbsp; 
+</div> 
+```
+
 
 ### Installation
 Installation notes for install-kig.cmd
