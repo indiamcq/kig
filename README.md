@@ -1,11 +1,11 @@
 # KIG
-## K Image Gallery tool [Installation](#instal) and Usage
+## K Image Gallery tool [Installation](#instal) and [Usage](#usage)
 
 KIG is a Windows command line tool.
 
-KIG makes the HTML code for you and also resizes the file to both thumbnail and full size. It uses a full installation of Irfanview for image processing. All three styles are supported. However if your files are not in the 1024x768 proportion then the Style 3 Full size should be done in FastStone Photo Resizer by specifing style 0 (zero). This one option only makes use of FastStone Photo Resizer.
+KIG makes the HTML code for you and also resizes the file to both thumbnail and full size. It uses a full installation of Irfanview for image processing. All three style outputs are supported. However if your files are not in the 1024x768 proportion then the Style 3 Full size should be done in FastStone Photo Resizer by specifing style 0 (zero). This one option only makes use of FastStone Photo Resizer. It requires some manual steps that are found in the K help pages.
 
-### How to use
+### <a name="usage"></a>How to use
 Open a command prompt at the folder where the gallery photos resides on your computer. (To open a command prompt at the folder, select the folder with the mouse, then hold down shift and right mouse click and select Open command window here.)
 
 #### Option 1 type just `kig` and press *[enter]*
