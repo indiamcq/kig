@@ -112,14 +112,15 @@ src="/sites/default/files/media/xxx/gallery-river_04_thumb.jpg" style="width: 21
 ---
 
 
-### <a name="instal"></a>Installation
-Installation notes for install-kig.cmd
-Unzip the ImageGallery.zip
-Right click on the install-kig.cmd file and select "Run as administrator"
+### <a name="instal"></a>Installation using install-kig.cmd
+
+1. Download the trunk.zip file from [here](https://github.com/indiamcq/kig/archive/master.zip) or on the right hand side of  this page https://github.com/indiamcq/kig
+2. Unzip the trunk.zip
+3. Right click on the install-kig.cmd file and select "Run as administrator"
 
 ![Run as Administrator](/photos/RunAsAdmin.GIF)
 
-Click Yes to the User Account Control.
+4. Click Yes to the User Account Control.
 
 ![Run as Administrator](/photos/UserAccountControl.GIF)
 
