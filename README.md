@@ -1,5 +1,5 @@
 # KIG
-## K Image Gallery tool Installation and Usage
+## K Image Gallery tool [Installation](#instal) and Usage
 
 KIG is a Windows command line tool.
 
@@ -112,7 +112,7 @@ src="/sites/default/files/media/xxx/gallery-river_04_thumb.jpg" style="width: 21
 ---
 
 
-### Installation
+### <a name="instal"></a>Installation
 Installation notes for install-kig.cmd
 Unzip the ImageGallery.zip
 Right click on the install-kig.cmd file and select "Run as administrator"
