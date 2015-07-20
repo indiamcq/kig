@@ -40,11 +40,11 @@ Finished!
 
 #### Option 2 type in all parameters `kig xxx river 1 444`
 
-The full command line `kig` `iso_site_code` `gallery_id` `style_number` [`site_number`] and annotated below. 
+The full command line `kig` `iso_site_code` `gallery_id` `style_number` [`site_number` or `m` or `p`] and annotated below. 
 - **kig** is the program name,
 - **xxx** is the site code often the ISO code,
 - **1** is the style type
-- **444** is the site number associated with the iso_site_code
+- **444** or **m** or **p** site number associated with the iso_site_code or `m` to use the matchbook numbers or `p` to use the production server numbers. `m` and `p` options added [2015-07-20]
 
 
 ##### Example: Command line with all parameters
