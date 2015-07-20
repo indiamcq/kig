@@ -8,7 +8,6 @@ echo.
 echo Making HTML and resized photos and thumbnails for K Image gallery.
 echo.
 rem the following shoud not need editing
-if not defined server set server=matchbook
 set mathbookip=192.16.10.253
 set kigpath=C:\Programs\kig
 set setcontrol=%kigpath%\SetTextInControl.exe
@@ -21,9 +20,9 @@ set kigprogramdata=C:\ProgramData\kig
 set kiginifile=%kigprogramdata%\i_view32.ini
 set kigsitelookup=%kigprogramdata%\site-lookup.txt
 set outpath=%cd%\readytoupload
-if not defined server call :getserver
-if defined server copy /y "%kigprogramdata%\%server%-site-lookup.txt" "%kigprogramdata%\site-lookup.txt"
-echo Server set to %server%
+
+
+rem set the program path
 if exist "C:\Program Files (x86)" (
   set irfanview="C:\Program Files (x86)\IrfanView\i_view32.exe"
   set fsr="C:\Program Files (x86)\FastStone Photo Resizer\FSResizer.exe"
@@ -31,6 +30,7 @@ if exist "C:\Program Files (x86)" (
   set irfanview="C:\Program Files\IrfanView\i_view32.exe"
   set fsr="C:\Program Files\FastStone Photo Resizer\FSResizer.exe"
 )
+echo on
 set fspr=FastStone Photo Resizer
 set numb=
 set endmarkup=
@@ -39,7 +39,15 @@ set site=%1
 set galleryname=%2
 set style=%3
 set projnumb=%4
-rem Lookup project number
+if /I "%projnumb%" ==  "m" call :setserver matchbook
+if /I "%projnumb%" ==  "p" call :setserver production
+rem set the server
+if not defined server call :getserver
+if not defined server set server=matchbook
+if defined server copy /y "%kigprogramdata%\%server%-site-lookup.txt" "%kigprogramdata%\site-lookup.txt"
+@echo Server set to %server%
+@echo off
+rem Lookup project number 
 if not defined projnumb if exist "%kigsitelookup%" call :lookup %site% "%kigsitelookup%"
 if defined lookupreturn set projnumb=%lookupreturn%
 if defined lookupreturn echo Site number for %site% set to: %lookupreturn%
@@ -428,4 +436,10 @@ goto :eof
 :getserver
 call :getline 1 "%kigprogramdata%\server.txt"
 set server=%getline%
+goto :eof
+
+:setserver
+set server=%~1
+echo %server% > %kigprogramdata%\server.txt
+set projnumb=
 goto :eof
