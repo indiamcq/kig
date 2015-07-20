@@ -30,7 +30,7 @@ if exist "C:\Program Files (x86)" (
   set irfanview="C:\Program Files\IrfanView\i_view32.exe"
   set fsr="C:\Program Files\FastStone Photo Resizer\FSResizer.exe"
 )
-echo on
+rem echo on
 set fspr=FastStone Photo Resizer
 set numb=
 set endmarkup=
