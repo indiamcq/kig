@@ -65,7 +65,7 @@ if not exist %irfanview% echo %irfanview% was not found.&echo Only the HTML will
 if not exist %fsr% echo %fsr% was not found.&echo Only the HTML will be created.&echo You will have to create the files manually!
 if exist "%cd%\readytoupload\*.jpg" del "%cd%\readytoupload\*.jpg"
 rem HTML
-echo ^<script type="text/javascript" src="/sites/default/files/media/%projnumb%/imageGallery.js"^>^</script^> > html.txt
+echo ^<script type="text/javascript" src="/sites/default/files/gallery/imageGallery.js"^>^</script^> > html.txt
 echo ^<p^>About these photos^</p^> >> html.txt
 echo ^<div class="image-gallery"^> >> html.txt
 set numb=
