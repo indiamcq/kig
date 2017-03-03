@@ -21,6 +21,7 @@ set kiginifile=%kigprogramdata%\i_view32.ini
 set kigsitelookup=%kigprogramdata%\site-lookup.txt
 set outpath=%cd%\readytoupload
 set thumbnailquality=60
+set bigimagequality=70
 
 
 rem set the program path
@@ -295,7 +296,7 @@ rem Write the code for each picture
 echo %endmarkup%^<a  >> html.txt
 echo href="/sites/default/files/media/%site%/%bigfilename%"^>^<img alt="" >> html.txt
 echo src="/sites/default/files/media/%site%/%thumbfilename%" style="width: 215px; height: 162px !important;" >> html.txt
-if exist %irfanview% call %irfanview% "%curfile%" /resize_long=1024 /resample /aspectratio /jpgq=70 /convert="%outpath%\%bigfilename%"
+if exist %irfanview% call %irfanview% "%curfile%" /resize_long=1024 /resample /aspectratio /jpgq=%bigimagequality% /convert="%outpath%\%bigfilename%"
 if exist %irfanview% call %irfanview% "%curfile%" /resize_long=215 /resample /aspectratio /jpgq=%thumbnailquality% /convert="%outpath%\%thumbfilename%"
 set endmarkup=/^^^>^^^</a^^^>^^^&nbsp;
 if exist "%outpath%\%bigfilename%" (
