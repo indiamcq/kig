@@ -6,6 +6,7 @@ rem must be started from folder with photos for inclusion in image gallery
 rem can also be started with just kig. Then answer prompts.
 rem ver 5 with 3 original styles supported with some Fast Stone intergration
 rem ver 6 replaced 4th param optional border color. Some named colors supported
+goto :main
 
 :main
 @call :funcdebugger main
@@ -20,48 +21,40 @@ set site=%1
 set galleryname=%2
 set style=%3
 set usercolor=%4
+if defined usercolor set bordercolor=%usercolor%
 call :setup
 call :iniread "%userpref%"
 call :uifallback
-call :fileloop process html
-:: generate the file links and files
-call :style%style%
+call :html
+call :style%style% %bordercolor%
 echo Finished!
-start notepad html.txt
-if not defined cl pause
+start notepad %htmlout%
 @call :funcdebugger main end
 goto :eof
 
 :fileloop
 @call :funcdebugger %~0 
 :: Description: loop through files in current directory
-set function=%~1
-set filetype=%~2
-set filesize=%~3
-set filestyle=%~4
-call :%filesize%%filestyle%
+echo var%~0 %~1 %~2 %~3 %~4
+set process=%~1
+set filesize=%~2
+set bordertype=%~3
+set imcolor=%~4
+rem get the style and size params
+if "%process%" == "jpg" set making=%filesize% JPG files with %bordertype% %imcolor% border
+if "%process%" == "htmlwrite" set making=HTML fragment
+echo ========== Making %making% ==========
 set numb=
-echo ---------- Making %making% ----------
-if "%filestyle%" == "solidborder" call :prepini
-if "%filestyle%" == "style3step4" call :prepini
-set subdir=
-if "%filestyle%" == "style3step1" set outpath=%cd%\foreground1
-if "%filestyle%" == "style3step2" set outpath=%cd%\foreground2
-if "%filestyle%" == "style3step3" set outpath=%cd%\background
-if "%filestyle%" == "style3step2" set subdir=forground1\
-if "%filestyle%" == "style3step4" set subdir=background\
-if "%filetype%" == "html" call :htmlpre
-echo %subdir%
-FOR /F " delims=" %%s IN ('dir /b %subdir%*.jpg') DO set curfile=%%s &call :%function%
-if "%filetype%" == "html" call :htmlpost
+FOR /F " delims=" %%s IN ('dir /b %subdir%*.jpg') DO call :%process% %%s
 @call :funcdebugger %~0 end
 goto :eof
 
 :style1
 @call :funcdebugger %~0
 :: Description: Creates the firts style of images
-call :fileloop process jpg thumb noborder
-rem call :fileloop process jpg large noborder
+echo var%~0 %~1 %~2 %~3 %~4
+call :fileloop jpg thumb no
+call :fileloop jpg large no
 @call :funcdebugger %~0 end
 goto :eof
 
@@ -69,41 +62,66 @@ goto :eof
 @call :funcdebugger %~0
 :: Description: make picture with border, default white
 rem  ----- make thumb with 2 px border ----- 
-call :backupini
-call :fileloop process jpg thumb solidborder
+echo var%~0 %~1 %~2 %~3 %~4
+set bordercolor=%~1
+if defined usercolor set imcolor=%usercolor%
+if not exist "%imconvert%" call :backupini
+call :fileloop jpg thumb solid %bordercolor%
 rem ----- make full with 10 px border ----- 
-call :fileloop process jpg large solidborder
+call :fileloop jpg large solid %imcolor%
 rem  restore the previous inifile
-call :restoreini
+if not exist "%imconvert%" call :bordercolor
 @call :funcdebugger %~0 end
 goto :eof
 
 :style3
 @call :funcdebugger %~0
+echo var%~0 %~1 %~2 %~3 %~4 
+call :fileloop jpg thumb embossed
+rem ----- make full with 10 px border ----- 
+call :fileloop jpg large embossed
 rem remove existing files if present
-if exist "%cd%\background\*.jpg" del "%cd%\background\*.jpg"
-if exist "%cd%\foreground1\*.jpg" del "%cd%\foreground1\*.jpg"
-if exist "%cd%\foreground2\*.jpg" del "%cd%\foreground2\*.jpg"
+rem if exist "%cd%\background\*.jpg" del "%cd%\background\*.jpg"
+rem if exist "%cd%\foreground1\*.jpg" del "%cd%\foreground1\*.jpg"
+rem if exist "%cd%\foreground2\*.jpg" del "%cd%\foreground2\*.jpg"
 
 rem ----- make thumb with 2 px border ----- 
-call :backupini
-call :fileloop process jpg thumb solidborder
+rem call :backupini
+rem call :fileloop jpg thumb border solid
 
 rem make forground picture step 1
-call :fileloop process jpg large style3step1
+rem call :fileloop jpg thumb border solid
 
 rem make foreground croped 25
-call :fileloop process jpg large style3step2
+rem call :fileloop process jpg large style3step2
 
 rem make darkened image
-call :fileloop process jpg large style3step3
+rem call :fileloop process jpg large style3step3
+rem call :restoreini
+@call :funcdebugger %~0 end
+goto :eof
+
+:style4
+@call :funcdebugger %~0
+echo var%~0 %~1 %~2 %~3 %~4
+set bordercolor=%~1
+:: Description: make picture with border, default white
+rem  ----- make thumb with 2 px border ----- 
+call :backupini
+call :fileloop jpg thumb 3d  %bordercolor%
+rem ----- make full with 10 px border ----- 
+call :fileloop jpg large 3d  %bordercolor%
+rem  restore the previous inifile
 call :restoreini
 @call :funcdebugger %~0 end
 goto :eof
 
+
+
 :style0
 @call :funcdebugger %~0
 :: Description: Setup for Fast Stone's partly manual processing
+echo %~0 %~1 %~2 %~3 %~4
 if exist %fsr% (
   call :start %fsr%
 ) else (
@@ -146,40 +164,133 @@ call setini "%inifile%" Batch AdvWatermark 0
 goto :eof
 
 
-
-:process
+:jpg
+echo var%~0 %~1 %~2 %~3 %~4
 @call :funcdebugger %~0
+set curfile=%~1
 :: Description: Process a file for options specified.
 set /a numb+=1
 set curnumb=0%numb%
 set curnumb=%curnumb:~-2%
+call :picsize %filesize% %bordertype%
+call :calcshortside "%curfile%" %longside% %border%
+call :border %bordertype% %imcolor%
 call :checkdir "%outpath%\%galleryname%"
-if "%filetype%" == "jpg" set filename=\%galleryname%\gallery-%galleryname%_%curnumb%%thumb%.jpg
-rem if "%filetype%" == "html" set thumbfilename=gallery-%galleryname%_%curnumb%_thumb.jpg
-rem if "%filetype%" == "html" set largefilename=gallery-%galleryname%_%curnumb%.jpg
-rem if "%filetype%" == "swm" set filename=gallery-%galleryname%_%curnumb%%thumb%.jpg
-rem Convert file to new size
-if "%filetype%" == "jpg"  (
-  if exist "%imconvert%" (
-    call "%imconvert%" "%subdir%%curfile%" -resize "%shortside%x%shortside%^>" "%outpath%\%filename%"
-  ) else (
-    if exist %irfanview% call %irfanview% "%subdir%%curfile%" %options% /convert="%outpath%\%filename%"
-  )
+@call :funcdebugger %~0
+set filename=%galleryname%\gallery-%galleryname%_%curnumb%%thumb%.jpg
+echo "%imconvert%" "%subdir%%curfile%" -resize "%newshortside%x%newshortside%^>" %imoptions%  "%outpath%\%filename%"
+call "%imconvert%" "%subdir%%curfile%" -resize "%newshortside%x%newshortside%^>" %imoptions%  "%outpath%\%filename%"
+if exist "%outpath%\%filename%" (
+  echo made %filename% 
+) else (
+  echo output file %filename% missing 
 )
-if "%filestyle%" == "style3step2" copy /y "%outpath%\%filename%" "C:\TEMP\forground.jpg"
-if "%filetype%" == "html" echo %endmarkup%^<a  >> html.txt
-if "%filetype%" == "html" echo href="/sites/default/files/media/%site%/%largefilename%"^>^<img alt="photo %numb%" >> html.txt
-if "%filetype%" == "html" echo src="/sites/default/files/media/%site%/%thumbfilename%" style="width: 215px; height: 162px !important;" >> html.txt
-if "%filetype%" == "jpg" (
-  if exist "%outpath%\%filename%" (
-    echo made %filename% 
-  ) else (
-    echo output file %filename% missing 
-  )
-)
+echo.
 @call :funcdebugger %~0 end
 goto :eof
 
+:picsize
+echo var%~0 %~1 %~2 %~3 %~4
+set filesize=%~1
+set bordertype=%~2
+if "%filesize%" == "thumb" (
+  set thumb=_thumb
+  set longside=%thumbside%
+  if %bordertype% == no (
+    set border=0
+    set adjust=-1
+  ) 
+  if %bordertype% == solid  (
+    set border=%thumbborder%
+    set adjust=2
+  )
+  if %bordertype% == embossed (
+    set border=%thembborder%
+    set bevel1=%thembbevel1%
+    set bevel2=%thembbevel2%
+    set shave=%thembshave%
+    set adjust=2
+  )  
+  if %bordertype% == 3d (
+    set border=%th3dborder%
+    set bevel2=%th3dbevel2%
+    set adjust=2
+  ) 
+) 
+if "%filesize%" == "large" (
+  set thumb=
+  set longside=%largeside%
+  if %bordertype% == no (
+    set border=0
+    set adjust=-2
+  ) 
+  if %bordertype% == solid  (
+    set border=%largeborder%
+    set adjust=6
+  )
+  if %bordertype% == embossed (
+    set border=%lgembborder%
+    set bevel1=%lgembbevel1%
+    set bevel2=%lgembbevel2%
+    set shave=%lgembshave%
+    set adjust=6
+  ) 
+  if %bordertype% == 3d (
+    set border=%lg3dborder%   
+    set bevel2=%lg3dbevel2%
+    set adjust=6
+  ) 
+)
+echo %~0 thumb=%thumb% longside=%longside% border=%border%
+goto :eof
+
+:border
+@call :funcdebugger %~0
+echo var%~0 %~1 %~2 %~3 %~4
+set bordertype=%~1
+set bordercolor=%~2
+if "%topcorner%" == "TopLeft" set /A newshortside=(%lside%*%inshort%/%inlong%)-(%border%*2)+%adjust%
+rem if "%topcorner%" == "TopLeft" set /A newshortside=(%lside%*%inshort%/%inlong%)
+if "%topcorner%" == "TopLeft" set /A newlongside=%lside%-%border%*2
+rem if "%orientation%" == "portrait" set /A shortside=%lside%*%width%/%height%
+rem if "%topcorner%" == "RightTop" set /A newshortside=(%lside%*%inshort%/%inlong%)
+if "%topcorner%" == "RightTop" set /A newshortside=(%lside%*%inshort%/%inlong%)-(%border%*2)+%adjust%
+if "%topcorner%" == "RightTop" set /A newlongside=%lside%-%border%*2
+echo %~0 long=%newlongside% short=%newshortside% orientation=%topcorner%
+rem imagemagick params
+if "%bordertype%" == "no" (set imoptions=)
+if "%bordertype%" == "solid" (set imoptions=-mattecolor %bordercolor%  -frame %border%X%border%)
+if "%bordertype%" == "embossed" set imoptions= ( +clone -shave %shave%x%shave% -alpha set -mattecolor #AAA6 -frame %border%x%border%+%bevel1%+%bevel2% ) -gravity center -composite
+if "%bordertype%" == "3d" (set imoptions=-mattecolor %bordercolor%  -frame %border%X%border%+0+%bevel2%)
+set imoptions
+@call :funcdebugger %~0 end
+goto :eof
+
+
+:calcshortside
+:: Description: Get the short side of picture
+:: Required parameters:
+:: pic
+:: lside
+:: border
+echo var%~0 %~1 %~2 %~3 %~4
+set pic=%~1
+set lside=%~2
+set border=%~3
+if not defined border set border=0 
+"%imidentify%" -format %%wx%%hx%%[orientation] "%pic%" >picspecs.txt
+rem "%imidentify%" -format %%h "%pic%" >height.txt
+rem "%imidentify%" -format %%[orientation] "%pic%" >orientation.txt
+for /F "delims=x tokens=1-3" %%w in (picspecs.txt) do set inlong=%%w& set inshort=%%x& set topcorner=%%y
+rem for /F %%w in (height.txt) do set inheight=%%w
+rem for /F %%w in (orientation.txt) do set inheight=%%w
+echo %~0 original file width %inwidth% height %inheight%  topcorner=%topcorner%
+rem if defined width (if %width% geq %height% set orientation=landscape) else (set orientation=portrait)
+rem if defined width (if "%width%" lss "%height%" set orientation=portrait) else (echo no width set)
+rem if "%orientation%" == "landscape" set /A shortside=%lside%*%height%/%width%
+set topcorner
+set newlongside newshortside
+goto :eof
 
 :start
 @call :funcdebugger %~0
@@ -227,8 +338,9 @@ if "%count%" == "0" (
 goto :eof
 
 :colorini
+if not defined usercolor (set color=%color%) else (set color=%usercolor%)
+set imcolor=%color%
 call :namedcolors
-if not defined bordercolor set color=16777215
 call setini "%curini%" Effects CanvColor %color%
 goto :eof
 
@@ -369,11 +481,10 @@ rem set the program path
 if exist "C:\Program Files (x86)" (
   set irfanview="C:\Program Files (x86)\IrfanView\i_view32.exe"
   set fsr="C:\Program Files (x86)\FastStone Photo Resizer\FSResizer.exe"
-  set imconvert=C:\Program Files\ImageMagick-6.9.1-Q16\convert.exe
 ) else (
   set irfanview="C:\Program Files\IrfanView\i_view32.exe"
   set fsr="C:\Program Files\FastStone Photo Resizer\FSResizer.exe"
-  set imconvert=C:\Program Files\ImageMagick-6.9.1-Q16\convert.exe
+
 )
 call :detectdateformat
 @call :funcdebugger %~0 end
@@ -394,104 +505,37 @@ if not exist %fsr% echo %fsr% was not found.&echo Only the HTML will be created.
 @call :funcdebugger %~0 end
 goto :eof
 
-:htmlpre
+:htmlwrite
+:: Description: Process a file for options specified.
 @call :funcdebugger %~0
-rem HTML
-if exist "%cd%\readytoupload\*.jpg" del "%cd%\readytoupload\*.jpg"
-echo ^<script type="text/javascript" src="/sites/default/files/gallery/imageGallery.js"^>^</script^> > html.txt
-echo ^<p^>About these photos^</p^> >> html.txt
-echo ^<div class="image-gallery"^> >> html.txt
+echo var%~0 %~1 %~2 %~3 %~4
+set /a numb+=1
+set curnumb=0%numb%
+set curnumb=%curnumb:~-2%
+call :checkdir "%outpath%\%galleryname%"
+set largefilename=%galleryname%/gallery-%galleryname%_%curnumb%.jpg
+set thumbfilename=%galleryname%/gallery-%galleryname%_%curnumb%_thumb.jpg
+echo ^<a href="/sites/default/files/media/%site%/%largefilename%"^>^<img alt="photo %numb%" >> %htmlout%
+echo src="/sites/default/files/media/%site%/%thumbfilename%" style="width: 215px; height: 162px !important;"/^> >> %htmlout%
+echo ^&nbsp;^</a^> >> %htmlout%
 @call :funcdebugger %~0 end
 goto :eof
 
-:htmlpost
-@call :funcdebugger %~0
-echo %endmarkup% >> html.txt
-echo ^</div^> >> html.txt
-@call :funcdebugger %~0 end
-goto :eof
 
 :html
 @call :funcdebugger %~0
-set making=HTML
+echo var%~0 %~1 %~2 %~3 %~4
+set making=HTML fragment
+set htmlout=gallery\%galleryname%\html.txt
+echo ^<script type="text/javascript" src="/sites/default/files/gallery/imageGallery.js"^>^</script^> > %htmlout%
+echo ^<p^>About these photos^</p^> >> %htmlout%
+echo ^<div class="image-gallery"^> >> %htmlout%
 @call :funcdebugger %~0 end
-goto :eof
-
-:thumbnoborder
-@call :funcdebugger %~0  1
-set making=thumb size with no borders
-set options=/resize_long=215 /resample /aspectratio /jpgq=%thumbimagequality% /sharpen=%thumbsharpenvalue%
-rem set imoptions=-resize '215x215^^>'
-set thumb=_thumb
-set longside=214
-set shortside=162
-@call :funcdebugger %~0 end
-goto :eof
-
-:largenoborder
+call :fileloop htmlwrite
 @call :funcdebugger %~0
-set making=large size with no borders
-set options=/resize_long=1024 /resample /aspectratio /jpgq=%largeimagequality%
-set imoptions=-resize '1024x1024^^>'
-set thumb=
-set longside=1024
-set shortside=768
+echo ^</div^> >> %htmlout%
 @call :funcdebugger %~0 end
 goto :eof
-
-:thumbsolidborder
-@call :funcdebugger %~0
-set curini=C:\ProgramData\kig\thumb-solidborder.ini
-set making=thumb size with borders
-set options=/jpgq=%thumbnailquality% /advancedbatch 
-set thumb=_thumb
-if exist %irfanview% call %irfanview% /killmesoftly
-@call :funcdebugger %~0 end
-goto :eof
-
-:largesolidborder
-@call :funcdebugger %~0
-set curini=C:\ProgramData\kig\large-solidborder.ini
-set making=large size with borders
-set options=/jpgq=%largeimagequality%  /advancedbatch 
-set thumb=
-if exist %irfanview% call %irfanview% /killmesoftly
-@call :funcdebugger %~0 end
-goto :eof
-
-:largestyle3step1
-@call :funcdebugger %~0
-set making=large image hi quality
-set options=/resize_long=1024 /resample /aspectratio /jpgq=100
-set thumb=
-@call :funcdebugger %~0 end
-goto :eof
-
-:largestyle3step2
-@call :funcdebugger %~0
-set making=cropped large image hi quality
-set options=/jpgq=100 /crop=(25,25,974,768,4) 
-set thumb=
-@call :funcdebugger %~0 end
-goto :eof
-
-:largestyle3step3
-@call :funcdebugger %~0
-set making=cropped large image hi quality
-set options=/resize_long=1024 /resample /aspectratio /jpgq=100 /bright=-100
-set thumb=
-@call :funcdebugger %~0 end
-goto :eof
-
-:largestyle3step4
-@call :funcdebugger %~0
-set curini=C:\ProgramData\kig\large-style3step4.ini
-set making=combine two files into one
-set options=/jpgq=%largeimagequality%  /advancedbatch 
-set thumb=
-@call :funcdebugger %~0 end
-goto :eof
-
 
 :ampmhour
 @call :funcdebugger %~0
@@ -608,22 +652,24 @@ goto :eof
 :funcdebugger
 @set func=%~1
 @set debugval=%~2
-if "%debugfuncboundary%" == "on" (
-@if "%debugval%" == "end"  (
-  echo ------------ End debug %func% --------------------------------------------------- 
-) else (
-  echo ============ Starting debug %func% ====================================================
-)
+@if "%debugfuncboundary%" == "on" (
+  @if "%debugval%" == "end"  (
+    echo ------------ End debug %func% --------------------------------------------------- 
+  ) else (
+    echo ============ Starting debug %func% ====================================================
+  )
 ) else (           
-@if "%debugval%" == "1" set %func%debug=on
-@if "%debugval%" == "1" echo on
-@if "%debugval%" == "1"  echo ============ Starting debug %func% ====================================================
-@if "%func%debug" == "on" echo off
-@if "%func%debug" == "on" echo ------------ End debug %func% --------------------------------------------------- 
-
-
+  @if "%debugval%" == "end"  (
+    @if defined debugfunc echo off
+    @if defined debugfunc echo ------------ End debug %func% --------------------------------------------------- 
+    @set debugfunc=
+  ) else (
+    @if "%debugval%" == "1" set debugfunc=on
+    @if "%debugval%" == "1" echo on
+    @if "%debugval%" == "1"  echo ============ Starting debug %func% ====================================================
+  )
 )
- @goto :eof
+@goto :eof
  
 :comparedate
 @call :funcdebugger %~0

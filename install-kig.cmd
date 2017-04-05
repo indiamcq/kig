@@ -33,18 +33,20 @@ set kigpath=C:\Programs\kig
 call :echolog Coping files to C:\Programs\kig folder
 copy /y "%startpath%\files\*.cmd" "%kigpath%\*.cmd"
 copy /y "%startpath%\files\*.exe" "%kigpath%\*.exe"
-if not exist "%startpath%\files\matchbook-site-lookup.txt" copy /y "%startpath%\files\matchbook-site-lookup.txt" "C:\ProgramData\kig\matchbook-site-lookup.txt"
-if not exist "%startpath%\files\production-site-lookup.txt" if exist "%startpath%\files\production-site-lookup.txt" copy /y "%startpath%\files\production-site-lookup.txt" "C:\ProgramData\kig\production-site-lookup.txt"
-if not exist "%startpath%\files\quality.ini" if exist "%startpath%\files\quality.ini" copy /y "%startpath%\files\quality.ini" "C:\ProgramData\kig\quality.ini"
-if not exist "%startpath%\files\server.txt" copy /y "%startpath%\files\server.txt" "C:\ProgramData\kig\server.txt"
+if not exist "C:\ProgramData\kig\user-pref.ini" copy /y "%startpath%\files\user-pref.ini" "C:\ProgramData\kig\user-pref.ini"
+rem if not exist "%startpath%\files\matchbook-site-lookup.txt" copy /y "%startpath%\files\matchbook-site-lookup.txt" "C:\ProgramData\kig\matchbook-site-lookup.txt"
+rem if not exist "%startpath%\files\production-site-lookup.txt" if exist "%startpath%\files\production-site-lookup.txt" copy /y "%startpath%\files\production-site-lookup.txt" "C:\ProgramData\kig\production-site-lookup.txt"
+rem if not exist "%startpath%\files\quality.ini" if exist "%startpath%\files\quality.ini" copy /y "%startpath%\files\quality.ini" "C:\ProgramData\kig\quality.ini"
+rem if not exist "%startpath%\files\quality.ini" if exist "%startpath%\files\user-pref.ini" copy /y "%startpath%\files\user-pref.ini" "C:\ProgramData\kig\user-pref.ini"
+rem if not exist "%startpath%\files\server.txt" copy /y "%startpath%\files\server.txt" "C:\ProgramData\kig\server.txt"
 if exist "%kigpath%\kig.cmd" call :echolog "kig.cmd installed"
 if not exist "%kigpath%\kig.cmd" call :echolog "CRITICAL ERROR. kig.cmd not found."
 if not exist "%kigpath%\kig.cmd" set critical=critical
 set /P server=Enter "y" if you want to use Matchbook site number lookup: 
-if "%server%" == "y" copy /y "%startpath%\files\matchbook-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
-if "%server%" == "y" echo You will need to edit the C:\ProgramData\kig\site-lookup.txt file for the matchbook server you are using.
-if "%server%" neq "y" if exist "C:\ProgramData\kig\production-site-lookup.txt" copy /y "%startpath%\files\production-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
-if not exist "C:\ProgramData\kig\production-site-lookup.txt" echo You will need to add a file C:\ProgramData\kig\production-site-lookup.txt to the folder C:\ProgramData\kig
+rem if "%server%" == "y" copy /y "%startpath%\files\matchbook-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
+rem if "%server%" == "y" echo You will need to edit the C:\ProgramData\kig\site-lookup.txt file for the matchbook server you are using.
+rem if "%server%" neq "y" if exist "C:\ProgramData\kig\production-site-lookup.txt" copy /y "%startpath%\files\production-site-lookup.txt" "C:\ProgramData\kig\site-lookup.txt"
+rem if not exist "C:\ProgramData\kig\production-site-lookup.txt" echo You will need to add a file C:\ProgramData\kig\production-site-lookup.txt to the folder C:\ProgramData\kig
 
 call :echolog Checking for image programs:
 rem Sort out 64 bit from 32 bit
