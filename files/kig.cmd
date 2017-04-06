@@ -20,9 +20,13 @@ set site=%1
 set galleryname=%2
 set style=%3
 set usercolor=%4
+set checkcmdline=%~3
 call :setup
 call :iniread "%userpref%"
+if not exist "%imconvert%" echo %imconvert% was not found.&echo Only the HTML will be created.&echo Please install ImageMagick and add path to user-pref.ini. &set fatal=true
 call :uifallback
+call :stylecheck
+if defined fatal exit /b
 call :html %site% %galleryname%
 call :style %style% %site% %galleryname% %bordercolor%
 echo Finished!
@@ -57,9 +61,9 @@ set longside=%~5
 set thumb=%~6
 call :checkdir "%outpath%\%galleryname%"
 rem get the style and size params
-if "%process%" == "jpg" set making=%thumb% JPG files with %stylename% %bordercolor% border
-if "%process%" == "htmlwrite" set making=HTML fragment
-echo ========== Making %making% ==========
+if "%process%" == "jpg" set making=%equal10% Making JPG%thumb% files with %stylename% %bordercolor% border %equal10%%equal10%%equal10%%equal10%%equal10%
+if "%process%" == "htmlwrite" set making=%equal10% Making HTML fragment %equal10%%equal10%%equal10%%equal10%%equal10%
+echo %making:~0,79%
 set numb=
 FOR /F " delims=" %%s IN ('dir /b %subdir%*.jpg') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
 set varset=process site galleryname stylename longside thumb making
@@ -222,6 +226,8 @@ goto :eof
 :setup
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 rem the following shoud not need editing
+set fatal=
+set bordercolor=
 set kigpath=C:\Programs\kig
 set kigprogramdata=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData
 rem set kigprogramdata=C:\ProgramData\kig
@@ -229,8 +235,9 @@ set curdir=%cd%
 set outpath=%cd%\gallery
 set userpref=%kigprogramdata%\user-pref.ini
 rem set userpref=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData\user-pref.ini
+set equal10===========
 rem create outpath if needed
-if not exist "%outpath%" md "%outpath%"
+call :checkdir "%outpath%"
 call :detectdateformat
 call :date
 call :time
@@ -243,16 +250,21 @@ goto :eof
 :uifallback
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 rem make sure variables are set
-if not defined site (
-  site echo usage with parameters: kig iso_site_code gallery_id style_number [site_number] &echo.
-  site echo You must specify a Project code.&set /P site=Enter Project code: 
-  echo How do you want to distinguish this gallery from other galleries?&set /P galleryname=Gallery name or code: 
-  echo What style do you want for the pictures?&set /P style=Choose theme number 1 or 2 or 3 or 4. Blank = 1: 
-  echo Do you want to specify a border color?&set /P usercolor=Enter a color word or leave blank for default color: 
-  if not defined style set style=1
-  if not defined galleryname set galleryname=1
-  if not exist %imconvert% echo %imconvert% was not found.&echo Only the HTML will be created.&echo Please install ImageMagick and add path to user-pref.ini.
+if not defined checkcmdline (
+  if defined usersite set site=%usersite%
+  if defined userstyle set style=%userstyle%
+  if defined usergalleryname set galleryname=%usergalleryname%
+  if defined usertbordercolor set bordercolor=%usertbordercolor%
 )
+if not defined site echo usage with parameters: kig iso_site_code gallery_id style_number [border_color] &echo.
+if not defined site echo You must specify a Project code.&set /P site=Enter Project code or leave blank for "%defaultsite%": 
+if not defined galleryname echo How do you want to distinguish this gallery from other galleries?&set /P galleryname=Gallery name or code: 
+if not defined style call :stylelist
+if not defined style echo What style do you want for the pictures?&set /P style=Choose style from the list above. Blank = %defaultstyle%: 
+if not defined checkcmdline if not defined defaultbordercolor echo Do you want to specify a border color?&set /P usercolor=Enter a color word or leave blank for default color "%defaultbordercolor%": 
+if not defined site set site=%defaultsite%
+if not defined style set style=%defaultstyle%
+if not defined galleryname set galleryname=%defaultgalleryname%
 set varset=site galleryname style usercolor
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
@@ -266,7 +278,6 @@ set galleryname=%~3
 set /a numb+=1
 set curnumb=0%numb%
 set curnumb=%curnumb:~-2%
-call :checkdir "%outpath%\%galleryname%"
 set largefilename=%galleryname%/gallery-%galleryname%_%curnumb%.jpg
 set thumbfilename=%galleryname%/gallery-%galleryname%_%curnumb%_thumb.jpg
 echo ^<a href="/sites/default/files/media/%site%/%largefilename%"^>^<img alt="photo %numb%" >> %htmlout%
@@ -443,3 +454,24 @@ set curmm=%fmm%
 set curdd=%fdd%
 goto :eof
 
+:stylecheck
+if not exist "%kigprogramdata%\style%style%.ini" (
+  echo Style %style% does not exist! 
+  echo Choose another style. 
+  call :stylelist
+  set fatal=true
+)
+goto :eof
+
+:stylelist
+echo Available style numbers and description:
+FOR /L %%n IN (1,1,50) DO call :stylewrite %%n
+echo.
+echo           Note: Enter only numbers.
+goto :eof
+
+:stylewrite
+set numb=%~1
+if exist "%kigprogramdata%\style%numb%.ini" call :iniread "%kigprogramdata%\style%numb%.ini"
+if exist "%kigprogramdata%\style%numb%.ini" (  echo %numb% %stylename% border) else (  goto :eof)
+goto :eof
