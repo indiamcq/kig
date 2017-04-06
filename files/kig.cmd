@@ -256,7 +256,7 @@ if not defined checkcmdline (
   if defined usergalleryname set galleryname=%usergalleryname%
   if defined usertbordercolor set bordercolor=%usertbordercolor%
 )
-if not defined site echo usage with parameters: kig iso_site_code gallery_id style_number [border_color] &echo.
+if not defined site echo Usage with parameters: kig iso_site_code gallery_id style_number [border_color] &echo.
 if not defined site echo You must specify a Project code.&set /P site=Enter Project code or leave blank for "%defaultsite%": 
 if not defined galleryname echo How do you want to distinguish this gallery from other galleries?&set /P galleryname=Gallery name or code: 
 if not defined style call :stylelist

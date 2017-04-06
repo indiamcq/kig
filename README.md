@@ -22,7 +22,7 @@ Making HTML and resized photos and thumbnails for K Image gallery.
 Usage with parameters: kig iso_site_code gallery_id style_number [border_color]
 
 You must specify a Project code.
-Enter Project code: **xxx**
+Enter Project code: <b>xxx</b>
 How do you want to distinguish this gallery from other galleries?
 Gallery name or code: **river**
 Available style numbers and description:
