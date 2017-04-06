@@ -20,7 +20,6 @@ set site=%1
 set galleryname=%2
 set style=%3
 set usercolor=%4
-if defined usercolor set bordercolor=%usercolor%
 call :setup
 call :iniread "%userpref%"
 call :uifallback
@@ -38,6 +37,7 @@ set site=%~2
 set galleryname=%~3
 set bordercolor=%~4
 call :iniread "%kigprogramdata%\style%style%.ini"
+if defined usercolor set bordercolor=%usercolor%
 set imoptions=%thumboptions%
 call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%thumbside%" "_thumb" 
 set imoptions=%largeoptions%
@@ -81,11 +81,17 @@ call :calcshortside "%curfile%" "%longside%"
 call :border "%longside%" "%orientation%"
 @call :funcdebugger %~0 "off" "[restart echo after calls]"
 set filename=%galleryname%\gallery-%galleryname%_%curnumb%%thumb%.jpg
-  if defined thumb (
-    call %thcmdfile%
-  ) else (
-    call %lgcmdfile%
-  )
+if defined thumb (
+  echo if defined fblevel4  echo "%imconvert%" "%curdir%\%curfile%" %thubmoptions% "%outpath%\%filename%" > "%kigpath%\makejpg.cmd"
+  echo echo "%imconvert%" "%curdir%\%curfile%" %thumboptions% "%outpath%\%filename%"^>^> "%logfile%" .> "%kigpath%\makejpg.cmd"
+  echo "%imconvert%" "%curdir%\%curfile%" %thumboptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+
+) else (
+  echo if defined fblevel4  echo "%imconvert%" "%curdir%\%curfile%" %largeoptions% "%outpath%\%filename%"  > "%kigpath%\makejpg.cmd"
+  echo echo "%imconvert%" "%curdir%\%curfile%" %largeoptions% "%outpath%\%filename%" ^>^> "%logfile%" >> "%kigpath%\makejpg.cmd"
+  echo "%imconvert%" "%curdir%\%curfile%" %largeoptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+)
+call "%kigpath%\makejpg.cmd"
 if defined fblevel1 (
   if exist "%outpath%\%filename%" (
     echo made %filename% 
@@ -101,71 +107,26 @@ goto :eof
 :border
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 set lside=%~1
-set /A newshortside=((%lside%*%inshort%)/%inlong%)-(%border%*2)
-set /A newlongside=%lside%-(%border%*2)
-set resize=%newlongside%x%newshortside%
-set varset=lside newshortside newlongside resize
-@call :funcdebugger %~0 end "%varset%"
-goto :eof
-
-
-
-:style1
-
-:: Description: Creates the firts style of images
-call :fileloop process jpg thumb noborder
-rem call :fileloop process jpg large noborder
-@call :funcdebugger %~0 end "%varset%"
-goto :eof
-
-:style2
-@call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
-:: Description: make picture with border, default white
-rem  ----- make thumb with 2 px border ----- 
-call :backupini
-call :fileloop process jpg thumb solidborder
-rem ----- make full with 10 px border ----- 
-call :fileloop process jpg large solidborder
-rem  restore the previous inifile
-call :restoreini
-@call :funcdebugger %~0 end "%varset%"
-goto :eof
-
-
-
-:style0
-@call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6 %~7 %~8
-:: Description: Setup for Fast Stone's partly manual processing
-if exist %fsr% (
-  call :start %fsr%
+if "%borderposition%" == "inside" (
+  set border=0
 ) else (
-  echo Free Stone Installer was not found.
+  if defined thumb (
+    set border=%thumbborder%
+  ) else (
+    set border=%largeborder%
+  )
 )
-
-rem ----- make thumb with 2 px border ----- 
-call :backupini
-call :fileloop process jpg thumb solidborder
-call :restoreini
-rem do some Fast Stone Resizer stuff
-if exist %fsr% (
-  echo setting %fspr% options.
-  echo You must click on Advance options and set the appropriate style.ccf
-  :: clear text in folder control
-  call "%setcontrol%" "%fspr%" "[CLASS:TEdit; INSTANCE:1]" ""
-  :: clear text in file nameing control
-  call "%setcontrol%" "%fspr%" "[CLASS:TbsCustomEdit; INSTANCE:1]" ""
-  :: send text to  folder control
-  call "%sendtextcontrol%" "%fspr%" "[CLASS:TEdit; INSTANCE:1]" "%cd%\{enter}"
-  :: send text to renaming control
-  call "%sendtextcontrol%" "%fspr%" "[CLASS:TbsCustomEdit; INSTANCE:1]" "gallery-%galleryname%{#}{#}"
-  :: add all files to Input list
-  call "%controlclick%" "%fspr%" "[CLASS:TbsSkinButton; INSTANCE:11]"
-  :: now specify the output folder
-  call "%setcontrol%" "%fspr%" "[CLASS:TEdit; INSTANCE:2]" "%cd%\readytoupload"
-)
+set /A newlongside=%lside%-(%border%*2)
+set /A newlongplusborderside=%lside%+(%border%*2)
+set /A newshortside=((%lside%*%inshort%)/%inlong%)-(%border%*2)
+set /A newshortnoborderside=((%lside%*%inshort%)/%inlong%)
+set /A newshortplusborderside=((%lside%*%inshort%)/%inlong%)+(%border%*2)
+set resize=%newlongside%x%newshortside%
+set fullsize=%lside%x%newshortnoborderside%
+set resizeaddborder=%newlongplusborderside%x%newshortplusborderside%
+set varset=lside newshortside newlongside resize fullsize
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
-
 
 :calcshortside
 :: Description: Get the short side of picture
@@ -270,7 +231,11 @@ set userpref=%kigprogramdata%\user-pref.ini
 rem set userpref=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData\user-pref.ini
 rem create outpath if needed
 if not exist "%outpath%" md "%outpath%"
-rem call :detectdateformat
+call :detectdateformat
+call :date
+call :time
+set logfile=%kigprogramdata%\kig_%curdate%.log
+echo :: %curdate% %curhh_mm% kig %site% %galleryname% %style% %usercolor% >> "%logfile%"
 set varset=kig outpath userpref
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
@@ -414,5 +379,67 @@ if not exist "%dir%" (
 )
 set varset=dir
 @call :funcdebugger %~0 end "%varset%"
+goto :eof
+
+:detectdateformat
+@call :funcdebugger %~0
+:: Description: Get the date format from the Registery: 0=US 1=AU 2=iso
+set KEY_DATE="HKCU\Control Panel\International"
+FOR /F "usebackq skip=2 tokens=3" %%A IN (`REG QUERY %KEY_DATE% /v iDate`) DO set dateformat=%%A
+rem get the date separator: / or -
+FOR /F "usebackq skip=2 tokens=3" %%A IN (`REG QUERY %KEY_DATE% /v sDate`) DO set dateseparator=%%A
+rem get the time separator: : or ?
+FOR /F "usebackq skip=2 tokens=3" %%A IN (`REG QUERY %KEY_DATE% /v sTime`) DO set timeseparator=%%A
+rem set project log file name by date
+@call :funcdebugger %~0 end
+goto :eof
+
+:time
+:: Description: Retrieve time in several shorter formats than %time% provides
+:: Created: 2016-05-05
+FOR /F "tokens=1-4 delims=:%timeseparator%." %%A IN ("%time%") DO (
+  set curhhmm=%%A%%B
+  set curhhmmss=%%A%%B%%C
+  set curhh_mm=%%A:%%B
+  set curhh_mm_ss=%%A:%%B:%%C
+)
+goto :eof
+
+:date
+:: Description: Returns multiple variables with date in three formats, the year in wo formats, month and day date.
+:: Revised: 2016-05-04
+:: Classs: command - internal - date -time
+:: Required preset variables:
+:: dateformat
+:: dateseparator
+rem got this from: http://www.robvanderwoude.com/datetiment.php#IDate
+if defined debugdefinefunc echo %beginfuncstring% %0 %debugstack% %beginfuncstringtail%
+FOR /F "tokens=1-4 delims=%dateseparator% " %%A IN ("%date%") DO (
+    IF "%dateformat%"=="0" (
+        SET fdd=%%C
+        SET fmm=%%B
+        SET fyyyy=%%D
+    )
+    IF "%dateformat%"=="1" (
+        SET fdd=%%B
+        SET fmm=%%C
+        SET fyyyy=%%D
+    )
+    IF "%dateformat%"=="2" (
+        SET fdd=%%D
+        SET fmm=%%C
+        SET fyyyy=%%B
+    )
+)
+set curdate=%fyyyy%-%fmm%-%fdd%
+set curisodate=%fyyyy%-%fmm%-%fdd%
+set curyyyymmdd=%fyyyy%%fmm%%fdd%
+set curyymmdd=%fyyyy:~2%%fmm%%fdd%
+set curUSdate=%fmm%/%fdd%/%fyyyy%
+set curAUdate=%fdd%/%fmm%/%fyyyy%
+set curyyyy=%fyyyy%
+set curyy=%fyyyy:~2%
+set curmm=%fmm%
+set curdd=%fdd%
 goto :eof
 
