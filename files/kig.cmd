@@ -23,7 +23,6 @@ set usercolor=%4
 set checkcmdline=%~3
 call :setup
 call :iniread "%userpref%"
-if not exist "%imconvert%" echo %imconvert% was not found.&echo Only the HTML will be created.&echo Please install ImageMagick and add path to user-pref.ini. &set fatal=true
 call :uifallback
 call :stylecheck
 if defined fatal exit /b
@@ -234,6 +233,9 @@ rem set kigprogramdata=C:\ProgramData\kig
 set curdir=%cd%
 set outpath=%cd%\gallery
 set userpref=%kigprogramdata%\user-pref.ini
+set imconvert=C:\programs\kig\imagemagick\convert.exe
+set imidentify=C:\programs\kig\imagemagick\identify.exe
+if not exist "%imconvert%" echo %imconvert% was not found.&echo Only the HTML will be created.&echo Please install ImageMagick and add path to user-pref.ini. &set fatal=true
 rem set userpref=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData\user-pref.ini
 set equal10===========
 rem create outpath if needed
@@ -278,8 +280,8 @@ set galleryname=%~3
 set /a numb+=1
 set curnumb=0%numb%
 set curnumb=%curnumb:~-2%
-set largefilename=%galleryname%/gallery-%galleryname%_%curnumb%.jpg
-set thumbfilename=%galleryname%/gallery-%galleryname%_%curnumb%_thumb.jpg
+set largefilename=gallery-%galleryname%_%curnumb%.jpg
+set thumbfilename=gallery-%galleryname%_%curnumb%_thumb.jpg
 echo ^<a href="/sites/default/files/media/%site%/%largefilename%"^>^<img alt="photo %numb%" >> %htmlout%
 echo src="/sites/default/files/media/%site%/%thumbfilename%" style="width: 215px; height: 162px !important;"/^> >> %htmlout%
 echo ^&nbsp;^</a^> >> %htmlout%
