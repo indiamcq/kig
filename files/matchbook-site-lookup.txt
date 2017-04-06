@@ -1,9 +1,0 @@
-kyb=59
-ibl-cul=60
-ifb-cul=61
-ify=62
-blw-cul=63
-lbk=64
-blw=65
-ibl=66
-ifb=67

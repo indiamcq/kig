@@ -1,5 +1,0 @@
-Opt("WinTitleMatchMode", 2)
-WinWait ( $CmdLine[1])
-WinActivate ( $CmdLine[1])
-WinWaitActive ( $CmdLine[1])
-ControlClick ( $CmdLine[1], "", $CmdLine[2] )
