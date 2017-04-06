@@ -9,7 +9,7 @@ rem ver 6 replaced 4th param optional border color. Some named colors supported
 goto :main
 
 :main
-rem call :funcdebugger kig-main "off" %1 %2 %3 %4 
+call :funcdebugger kig-main "off" %1 %2 %3 %4 
 @echo.
 @echo    Making HTML and resized photos and thumbnails for K Image gallery.
 @echo                               v3
@@ -38,9 +38,10 @@ set site=%~2
 set galleryname=%~3
 set bordercolor=%~4
 call :iniread "%kigprogramdata%\style%style%.ini"
-echo %largeoptions% %largeoptionsb%
-call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%thumbside%" "%bordercolor%" "%thumboptions%" "_thumb" 
-call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%largeside%" "%bordercolor%" "%largeoptions%"
+set imoptions=%thumboptions%
+call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%thumbside%" "_thumb" 
+set imoptions=%largeoptions%
+call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%largeside%" 
 set varset=style site galleryname bordercolor thumboptions largeoptions
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
@@ -51,18 +52,17 @@ goto :eof
 set process=%~1
 set site=%~2
 set galleryname=%~3
-set name=%~4
+set stylename=%~4
 set longside=%~5
-set bordercolor=%~6
-set imoptions=%~7
-set thumb=%~8
+set thumb=%~6
 call :checkdir "%outpath%\%galleryname%"
 rem get the style and size params
-if "%process%" == "jpg" set making=%filesize% JPG files with %name% %imcolor% border
+if "%process%" == "jpg" set making=%thumb% JPG files with %stylename% %bordercolor% border
 if "%process%" == "htmlwrite" set making=HTML fragment
 echo ========== Making %making% ==========
 set numb=
 FOR /F " delims=" %%s IN ('dir /b %subdir%*.jpg') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
+set varset=process site galleryname stylename longside thumb making
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
 
@@ -79,16 +79,13 @@ set curnumb=0%numb%
 set curnumb=%curnumb:~-2%
 call :calcshortside "%curfile%" "%longside%"
 call :border "%longside%" "%orientation%"
-if defined largeoption-b set imoptions=%imoptions% %largeoptionb%
-@call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
+@call :funcdebugger %~0 "off" "[restart echo after calls]"
 set filename=%galleryname%\gallery-%galleryname%_%curnumb%%thumb%.jpg
-if "%stylename%" == "no" (
-  echo "%imconvert%" "%subdir%%curfile%" -resize "%resize%" "%outpath%\%filename%"
-  call "%imconvert%" "%subdir%%curfile%" -resize "%resize%" "%outpath%\%filename%"
-) else (
-  echo "%imconvert%" "%subdir%%curfile%" -resize "%resize%" %imoptions%  "%outpath%\%filename%"
-  call "%imconvert%" "%subdir%%curfile%" -resize "%resize%" %imoptions%  "%outpath%\%filename%"
-)
+  if defined thumb (
+    call %thcmdfile%
+  ) else (
+    call %lgcmdfile%
+  )
 if defined fblevel1 (
   if exist "%outpath%\%filename%" (
     echo made %filename% 
@@ -267,13 +264,14 @@ rem the following shoud not need editing
 set kigpath=C:\Programs\kig
 set kigprogramdata=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData
 rem set kigprogramdata=C:\ProgramData\kig
+set curdir=%cd%
 set outpath=%cd%\gallery
 set userpref=%kigprogramdata%\user-pref.ini
 rem set userpref=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData\user-pref.ini
 rem create outpath if needed
 if not exist "%outpath%" md "%outpath%"
 rem call :detectdateformat
-set varset=kigprogramdata outpath userpref
+set varset=kig outpath userpref
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
 
@@ -310,7 +308,7 @@ echo ^<a href="/sites/default/files/media/%site%/%largefilename%"^>^<img alt="ph
 echo src="/sites/default/files/media/%site%/%thumbfilename%" style="width: 215px; height: 162px !important;"/^> >> %htmlout%
 echo ^&nbsp;^</a^> >> %htmlout%
 set varset=curfile site galleryname numb curnumb largefilename thumbfilename
-@call :funcdebugger %~0 end
+@call :funcdebugger %~0 end  "%varset%"
 goto :eof
 
 
@@ -320,15 +318,16 @@ set site=%~1
 set galleryname=%~2
 set making=HTML fragment
 set htmlout=gallery\%galleryname%\html.txt
+if exist "%htmlout%" del /Q gallery\%galleryname%\*.*
 echo ^<script type="text/javascript" src="/sites/default/files/gallery/imageGallery.js"^>^</script^> > %htmlout%
 echo ^<p^>About these photos^</p^> >> %htmlout%
 echo ^<div class="image-gallery"^> >> %htmlout%
-@call :funcdebugger %~0 end
+@call :funcdebugger %~0 off
 call :fileloop htmlwrite %site% %galleryname%
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 echo ^</div^> >> %htmlout%
 set varset=making htmlout
-@call :funcdebugger %~0 end
+@call :funcdebugger %~0 end  "%varset%"
 goto :eof
 
 
@@ -360,7 +359,6 @@ goto :eof
 set func=%~1
 set debugval=%~2
 set list=%~3
-if "%debugval%" == "on" echo on & set echoon=on
 if "%debugval%" == "end" if defined echoon echo off
 rem echo param::debugger "off" %~1 %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
 if defined fblevel2 if "%debugval%" == "off" echo ====== param:%func% %~3 %~4 %~5 %~6 %~7 %~8 %~9
@@ -376,7 +374,9 @@ if defined fblevel3 if "%debugval%" == "end" for /F "tokens=1-10 delims= " %%a I
   if "%%h" neq "" set %%h
   if "%%i" neq "" set %%i
   if "%%j" neq "" set %%j
+  echo.
 )
+if "%debugval%" == "on" echo on & set echoon=on
 @goto :eof
  
 :comparedate
