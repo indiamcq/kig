@@ -22,9 +22,9 @@ Making HTML and resized photos and thumbnails for K Image gallery.
 Usage with parameters: kig iso_site_code gallery_id style_number [border_color]
 
 You must specify a Project code.
-Enter Project code: <b>xxx</b>
+Enter Project code: xxx
 How do you want to distinguish this gallery from other galleries?
-Gallery name or code: **river**
+Gallery name or code: river
 Available style numbers and description:
 1 no border
 2 solid border
@@ -37,7 +37,7 @@ Available style numbers and description:
 
           Note: Enter only numbers.
 What style do you want for the pictures?
-Choose theme number from the list above Blank = 1: **1**
+Choose theme number from the list above Blank = 1: 1
 What is the project number?
 Enter number or leave blank for site code: 44
 ========== Making HTML fragment ===============================================

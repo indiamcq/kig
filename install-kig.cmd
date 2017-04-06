@@ -30,11 +30,13 @@ if "%upath:~-1008%" == "%upath:~-10024%" (
 set kigpath=C:\Programs\kig
 call :echolog Coping files to C:\Programs\kig folder
 copy /y "%startpath%\files\*.cmd" "%kigpath%\*.cmd"
+if not exist "%kigpath%\imagemagick" md "%kigpath%\imagemagick"
+copy /y "%startpath%\files\imagemagick\*.*" "%kigpath%\imagemagick\*.*"
 rem copy /y "%startpath%\files\*.exe" "%kigpath%\*.exe"
 rem if not exist "%startpath%\files\matchbook-site-lookup.txt" copy /y "%startpath%\files\matchbook-site-lookup.txt" "C:\ProgramData\kig\matchbook-site-lookup.txt"
 rem if not exist "%startpath%\files\production-site-lookup.txt" if exist "%startpath%\files\production-site-lookup.txt" copy /y "%startpath%\files\production-site-lookup.txt" "C:\ProgramData\kig\production-site-lookup.txt"
 rem if not exist "%startpath%\files\quality.ini" if exist "%startpath%\files\quality.ini" copy /y "%startpath%\files\quality.ini" "C:\ProgramData\kig\quality.ini"
-if not exist "%startpath%\files\ProgramData\*.ini" copy /y "%startpath%\files\ProgramData\*.ini" "C:\ProgramData\kig\ProgramData\*.ini"
+if exist "%startpath%\files\ProgramData\*.ini" copy /y "%startpath%\files\ProgramData\*.ini" "C:\ProgramData\kig\*.ini"
 if exist "%kigpath%\kig.cmd" call :echolog "kig.cmd installed"
 if not exist "%kigpath%\kig.cmd" call :echolog "CRITICAL ERROR. kig.cmd not found."
 if not exist "%kigpath%\kig.cmd" set critical=critical

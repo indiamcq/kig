@@ -12,8 +12,8 @@ goto :main
 call :funcdebugger kig-main "off" %1 %2 %3 %4 
 @echo.
 @echo    Making HTML and resized photos and thumbnails for K Image gallery.
-@echo                               v3
-@echo         Available from: https://github.com/indiamcq/kig
+@echo.
+@echo   Version 3 available from: https://github.com/indiamcq/kig/tree/kig3
 @echo.
 rem get parameters if passed
 set site=%1
