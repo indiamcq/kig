@@ -1,0 +1,122 @@
+<html>
+<head><!--
+*******************************************************************************
+*  Create GUI for KIG bat file.                                               *
+*                                                                             *
+******************************************************************************* -->
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1250">
+  <title> Put Your Title Here </title>
+  <HTA:application 
+  applicationName="kig app" 
+  singleinstance="yes"
+  />
+  <style type="text/css">
+  /* <![CDATA[ */
+  BODY {
+
+    color: white;
+    border: thin white solid;
+    margin: 10px 10px 10px 10px;
+    font: 12px Verdana;  
+  }
+  /* ]]> */
+  </style>
+  <script language="vbscript">
+Option Explicit
+
+Dim strPath 
+Dim picPath
+dim shell
+Dim objShell
+Set objShell = CreateObject("Wscript.Shell")
+
+picPath = "C:\users\%username%\Pictures\"
+' strPath = SelectFolder( picPath )
+
+Sub RunScript1
+  Msgbox "The script has run. " + ShowSelectedFolder.Value + " " + site
+  objShell.run("%comspec% /c C:\programs\kig\kigg.cmd DirToProcess site galleryname.value style.value usercolor.value")
+'  shell.Run "%comspec% /c C:\programs\kig\kigg.cmd SelectedFolder.value site.value galleryname.value style.value usercolor.value", 0, True
+End Sub
+  
+
+
+
+
+
+
+Function SelectFolder( myStartFolder )
+' This function opens a "Select Folder" dialog and will
+' return the fully qualified path of the selected folder
+'
+' Argument:
+'     myStartFolder    [string]    the root folder where you can start browsing;
+'                                  if an empty string is used, browsing starts
+'                                  on the local computer
+'
+' Returns:
+' A string containing the fully qualified path of the selected folder
+'
+' Written by Rob van der Woude
+' http://www.robvanderwoude.com
+
+    ' Standard housekeeping
+    Dim objFolder, objItem, objShell
+    
+    ' Custom error handling
+    On Error Resume Next
+    SelectFolder = vbNull
+
+    ' Create a dialog object
+    Set objShell  = CreateObject( "Shell.Application" )
+    Set objFolder = objShell.BrowseForFolder( 0, "Select Folder", 0, myStartFolder )
+
+    ' Return the path of the selected folder
+    If IsObject( objfolder ) Then SelectFolder = objFolder.Self.Path
+    ShowSelectedFolder.Value = SelectFolder
+        site.Value = "xxx"
+    galleryname.value = "gal"
+    usercolor.value = "red"
+    ' Standard housekeeping
+    Set objFolder = Nothing
+    Set objshell  = Nothing
+    On Error Goto 0
+End Function
+
+Sub ShowValue
+    ShowSelectedFolder.Value = .SelectFolder
+    site.Value = "xxx"
+    galleryname.value = "gal"
+    usercolor.value = "red"
+End Sub
+
+  </script>
+  <SCRIPT language="JavaScript">
+window.resizeTo(600,450);
+
+
+</SCRIPT>
+</head>
+<body >
+<table>
+ <tr><td>
+   <button onclick="RunScript1" width="200px">No border</button><br />
+   <button onclick="RunScript2">Solid color border</button><br />
+   <button onclick="RunScript3">Inner bevel border</button><br />
+   <button onclick="RunScript4">embossed bevelled border</button><br />
+   <button onclick="RunScript5">Rainbow border</button><br />
+   <button onclick="RunScript6">Fuzzed edge border</button><br />
+   <button onclick="RunScript7">Raised bevel border</button><br />
+   <button onclick="RunScript8">Sunken bevel border</button><br />
+ </td>
+ <td>
+ <input id=runbutton  class="button" type="button" value="Select Your Picture Folder" 
+name="DirToProcess"  onClick="SelectFolder(picPath)" onChange="">
+<input type="text" name="ShowSelectedFolder" size="60" maxLength="255" ><br />
+ <input type="text" name="site" size="30"><br />
+ <input type="text" name="galleryname" size="30"><br />
+ <input type="text" name="usercolor" size="30"><br />
+ </td></tr>
+</table>
+</body>
+</HTmL>
