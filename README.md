@@ -129,11 +129,11 @@ src="/sites/default/files/media/xxx/gallery-river_04_thumb.jpg" style="width: 21
 2. Unzip the trunk.zip
 3. Right click on the install-kig.cmd file and select "Run as administrator"
 
-  ![Run as Administrator](/photos/RunAsAdmin.GIF)
+  ![Run as Administrator](photos/RunAsAdmin.GIF)
 
 4. Click Yes to the User Account Control.
 
-  ![Run as Administrator](/photos/UserAccountControl.GIF)
+  ![Run as Administrator](photos/UserAccountControl.GIF)
 
 You need to instal ImageMagic. 
 Without Irfanview the HTML will still be generated but no files resized. While FastStone Photo Resizer is only used in style 0.

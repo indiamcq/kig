@@ -20,6 +20,8 @@ set site=%1
 set galleryname=%2
 set style=%3
 set usercolor=%4
+set remotepath=%5
+set remotepath=%remotepath:"=%
 set checkcmdline=%~3
 call :setup
 call :iniread "%userpref%"
@@ -62,9 +64,9 @@ call :checkdir "%outpath%\%galleryname%"
 rem get the style and size params
 if "%process%" == "jpg" set making=%equal10% Making JPG%thumb% files with %stylename% %bordercolor% border %equal10%%equal10%%equal10%%equal10%%equal10%
 if "%process%" == "htmlwrite" set making=%equal10% Making HTML fragment %equal10%%equal10%%equal10%%equal10%%equal10%
-echo %making:~0,79%
+if defined level2 echo %making:~0,79%
 set numb=
-FOR /F " delims=" %%s IN ('dir /b %subdir%*.jpg') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
+FOR /F " delims=" %%s IN ('dir /b %picdir%\*.jpg') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
 set varset=process site galleryname stylename longside thumb making
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
@@ -85,14 +87,14 @@ call :border "%longside%" "%orientation%"
 @call :funcdebugger %~0 "off" "[restart echo after calls]"
 set filename=%galleryname%\gallery-%galleryname%_%curnumb%%thumb%.jpg
 if defined thumb (
-  echo if defined fblevel4  echo "%imconvert%" "%curdir%\%curfile%" %thubmoptions% "%outpath%\%filename%" > "%kigpath%\makejpg.cmd"
-  echo echo "%imconvert%" "%curdir%\%curfile%" %thumboptions% "%outpath%\%filename%"^>^> "%logfile%" .> "%kigpath%\makejpg.cmd"
-  echo "%imconvert%" "%curdir%\%curfile%" %thumboptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+  echo if defined fblevel4  echo "%imconvert%" "%picdir%\%curfile%" %thubmoptions% "%outpath%\%filename%" > "%kigpath%\makejpg.cmd"
+  echo echo "%imconvert%" "%picdir%\%curfile%" %thumboptions% "%outpath%\%filename%"^>^> "%logfile%" .> "%kigpath%\makejpg.cmd"
+  echo "%imconvert%" "%picdir%\%curfile%" %thumboptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
 
 ) else (
-  echo if defined fblevel4  echo "%imconvert%" "%curdir%\%curfile%" %largeoptions% "%outpath%\%filename%"  > "%kigpath%\makejpg.cmd"
-  echo echo "%imconvert%" "%curdir%\%curfile%" %largeoptions% "%outpath%\%filename%" ^>^> "%logfile%" >> "%kigpath%\makejpg.cmd"
-  echo "%imconvert%" "%curdir%\%curfile%" %largeoptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+  echo if defined fblevel4  echo "%imconvert%" "%picdir%\%curfile%" %largeoptions% "%outpath%\%filename%"  > "%kigpath%\makejpg.cmd"
+  echo echo "%imconvert%" "%picdir%\%curfile%" %largeoptions% "%outpath%\%filename%" ^>^> "%logfile%" >> "%kigpath%\makejpg.cmd"
+  echo "%imconvert%" "%picdir%\%curfile%" %largeoptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
 )
 call "%kigpath%\makejpg.cmd"
 if defined fblevel1 (
@@ -138,7 +140,7 @@ goto :eof
 :: lside
 :: border
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6 %~7 %~8
-set pic=%~1
+set pic=%picdir%\%~1
 if not defined border set border=0 
 "%imidentify%" -format %%wx%%hx%%[orientation] "%pic%" >picspecs.txt
 for /F "delims=x tokens=1-3" %%w in (picspecs.txt) do set inlong=%%w& set inshort=%%x& set orientation=%%y
@@ -228,15 +230,13 @@ rem the following shoud not need editing
 set fatal=
 set bordercolor=
 set kigpath=C:\Programs\kig
-set kigprogramdata=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData
-rem set kigprogramdata=C:\ProgramData\kig
-set curdir=%cd%
-set outpath=%cd%\gallery
+set kigprogramdata=C:\ProgramData\kig
+if not defined remotepath (set picdir=%cd%) else (set picdir=%remotepath%)
+if not defined remotepath (set outpath=%cd%\gallery) else (set outpath=%remotepath%\gallery)
 set userpref=%kigprogramdata%\user-pref.ini
-set imconvert=C:\programs\kig\imagemagick\convert.exe
-set imidentify=C:\programs\kig\imagemagick\identify.exe
+set imconvert=%kigpath%\imagemagick\convert.exe
+set imidentify=%kigpath%\imagemagick\identify.exe
 if not exist "%imconvert%" echo %imconvert% was not found.&echo Only the HTML will be created.&echo Please install ImageMagick and add path to user-pref.ini. &set fatal=true
-rem set userpref=D:\All-SIL-Publishing\github\kig\branches\kig3\files\ProgramData\user-pref.ini
 set equal10===========
 rem create outpath if needed
 call :checkdir "%outpath%"
@@ -289,28 +289,24 @@ set varset=curfile site galleryname numb curnumb largefilename thumbfilename
 @call :funcdebugger %~0 end  "%varset%"
 goto :eof
 
-
 :html
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 set site=%~1
 set galleryname=%~2
 set making=HTML fragment
-set htmlout=gallery\%galleryname%\html.txt
+set htmlout=%picdir%\gallery\%galleryname%\html.txt
 if exist "%htmlout%" del /Q gallery\%galleryname%\*.*
-echo ^<script type="text/javascript" src="/sites/default/files/gallery/imageGallery.js"^>^</script^> > %htmlout%
-echo ^<p^>About these photos^</p^> >> %htmlout%
-echo ^<div class="image-gallery"^> >> %htmlout%
+echo ^<script type="text/javascript" src="/sites/default/files/gallery/imageGallery.js"^>^</script^> > "%htmlout%"
+echo ^<p^>About these photos^</p^> >> "%htmlout%"
+echo ^<div class="image-gallery"^> >> "%htmlout%"
 @call :funcdebugger %~0 off
 call :fileloop htmlwrite %site% %galleryname%
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
-echo ^</div^> >> %htmlout%
+echo ^</div^> >> "%htmlout%"
+if exist "%htmlout%" echo made "%htmlout%"
 set varset=making htmlout
 @call :funcdebugger %~0 end  "%varset%"
 goto :eof
-
-
-
-
 
 :funcdebugger1
 if "%debugval%" == "end"  (
