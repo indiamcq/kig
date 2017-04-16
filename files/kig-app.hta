@@ -36,7 +36,7 @@
   </style>
   <script language="vbscript">
 Option Explicit
-Dim iniFile, siteInput, gallerynameInput, usercolorInput, inputPicPath
+Dim guiIni, transferIni, siteInput, gallerynameInput, usercolorInput, inputPicPath
 Dim strPath, dquote, WScript
 Dim picPath, strUserProfile
 dim shell
@@ -45,7 +45,8 @@ Dim cmdline
 Set objShell = CreateObject("Wscript.Shell")
 
 dquote = chr(34)
-iniFile = "C:\ProgramData\kig\gui.ini"
+guiIni = "C:\ProgramData\kig\gui.ini"
+transferIni = "C:\ProgramData\kig\transfer.ini"
 strUserProfile = objShell.ExpandEnvironmentStrings( "%userprofile%" )
 picPath =  ""
 ' strPath = SelectFolder( picPath )
@@ -53,25 +54,28 @@ picPath =  ""
 Function loadUserDefaults
     ' my additions  ============================================================
     ' gallerynameInput = ReadIni(iniFile,"gui","galleryname")
-    ShowSelectedFolder.Value = ReadIni(iniFile,"gui","picPath")
-    site.Value = ReadIni(iniFile,"gui","site")
-    galleryname.value = ReadIni(iniFile,"gui","galleryname")
-    usercolor.Value = ReadIni(iniFile,"gui","usercolor")
+    ShowSelectedFolder.Value = ReadIni(guiIni,"gui","userpicPath")
+    site.Value = ReadIni(guiIni,"gui","usersite")
+    galleryname.value = ReadIni(guiIni,"gui","usergalleryname")
+    usercolor.Value = ReadIni(guiIni,"gui","userbordercolor")
     ' ==========================================================================
 End Function
 
-Function writeUserDefaults
+Function writeUserIni (iniFile,section,styleout)
     ' my additions  ============================================================
     ' gallerynameInput = ReadIni(iniFile,"gui","galleryname")
-     WriteIni iniFile,"gui","picPath",ShowSelectedFolder.Value
-     WriteIni iniFile,"gui","site",site.Value
-     WriteIni iniFile,"gui","galleryname",galleryname.value
-     WriteIni iniFile,"gui","usercolor",usercolor.Value
+     WriteIni iniFile,section,"userpicPath",ShowSelectedFolder.Value
+     WriteIni iniFile,section,"usersite",site.Value
+     WriteIni iniFile,section,"usergalleryname",galleryname.value
+     WriteIni iniFile,section,"userstyle",styleout
+     WriteIni iniFile,section,"userbordercolor",usercolor.Value
     ' ==========================================================================
 End Function
 
 Sub RunScript(styleout)
-    cmdline = "cmd.exe /c C:\programs\kig\kigg.cmd "  + site.Value + " " + galleryname.Value + " " + styleout + " " + dquote + Trim(usercolor.Value) + dquote + " " +  ShowSelectedFolder.Value
+    writeUserIni transferIni,"variables",styleout
+    cmdline = "cmd.exe /c C:\programs\kig\kig.cmd"
+    'cmdline = "cmd.exe /c C:\programs\kig\kigg.cmd "  + site.Value + " " + galleryname.Value + " " + styleout + " " + dquote + Trim(usercolor.Value) + dquote + " " +  ShowSelectedFolder.Value
     ' Msgbox "The script has run. " + cmdline
     objShell.run(cmdline)
 End Sub
@@ -339,7 +343,7 @@ window.resizeTo(700,600);
 <input type="text" name="ShowSelectedFolder" size="60" maxLength="255" > <br />
 <div class="floatright">
  <button onclick="loadUserDefaults" name="LoadValues" class="inibutton">Load saved values</button> <br />
-<button onclick="writeUserDefaults" name="SaveValues" class="inibutton">Save values</button>
+  <button onclick="writeUserIni guiIni,'gui','1'" name="SaveValues" class="inibutton">Save values</button>
 </div>
  <!-- <input id=runbutton  class="button" type="button" value="Select Your Picture Folder" 
 name="DirToProcess"  onClick="SelectFolder(picPath)" onChange="">

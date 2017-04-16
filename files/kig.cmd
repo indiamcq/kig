@@ -1,11 +1,18 @@
 @echo off
 if "%2" == "debug" echo on
-set debugstack=00
+rem get parameters if passed
+set site=%1
+set galleryname=%2
+set style=%3
+set usercolor=%4
+set checkcmdline=%~3
+rem set debugstack=00
 rem usage: kig iso_site_code gallery_id style_number [border_color]
 rem must be started from folder with photos for inclusion in image gallery
 rem can also be started with just kig. Then answer prompts.
 rem ver 5 with 3 original styles supported with some Fast Stone intergration
 rem ver 6 replaced 4th param optional border color. Some named colors supported
+@call :funcdebugger kig end "site galleryname style usercolor checkcmdline"
 goto :main
 
 :main
@@ -15,23 +22,19 @@ call :funcdebugger kig-main "off" %1 %2 %3 %4
 @echo.
 @echo   Version 3 available from: https://github.com/indiamcq/kig/tree/kig3
 @echo.
-rem get parameters if passed
-set site=%1
-set galleryname=%2
-set style=%3
-set usercolor=%4
-set remotepath=%5
-set remotepath=%remotepath:"=%
-set checkcmdline=%~3
 call :setup
-call :iniread "%userpref%"
+call :iniread "%kigini%"
+if exist "%transferini%" (call :iniread "%transferini%") else (call :iniread "%userpref%" )
 call :uifallback
 call :stylecheck
 if defined fatal exit /b
 call :html %site% %galleryname%
-call :style %style% %site% %galleryname% %bordercolor%
+if "%bordercolor%" neq "html" call :style %style% %site% %galleryname% %bordercolor%
 echo Finished!
-start notepad %htmlout%
+start notepad "%htmlout%"
+if exist "%transferini%" start explorer "%outpath%"
+if defined pauseatend %pauseatend%
+if exist "%transferini%" del "%transferini%"
 @call :funcdebugger kig-main end "%varset%"
 goto :eof
 
@@ -42,6 +45,8 @@ set site=%~2
 set galleryname=%~3
 set bordercolor=%~4
 call :iniread "%kigprogramdata%\style%style%.ini"
+if defined defaultbordercolor set bordercolor=%defaultbordercolor%
+if defined userbordercolor set bordercolor=%userbordercolor%
 if defined usercolor set bordercolor=%usercolor%
 set imoptions=%thumboptions%
 call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%thumbside%" "_thumb" 
@@ -60,13 +65,12 @@ set galleryname=%~3
 set stylename=%~4
 set longside=%~5
 set thumb=%~6
-call :checkdir "%outpath%\%galleryname%"
 rem get the style and size params
 if "%process%" == "jpg" set making=%equal10% Making JPG%thumb% files with %stylename% %bordercolor% border %equal10%%equal10%%equal10%%equal10%%equal10%
 if "%process%" == "htmlwrite" set making=%equal10% Making HTML fragment %equal10%%equal10%%equal10%%equal10%%equal10%
 if defined level2 echo %making:~0,79%
 set numb=
-FOR /F " delims=" %%s IN ('dir /b %picdir%\*.jpg') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
+FOR /F " delims=" %%s IN ('dir /b %picpath%\*.jpg') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
 set varset=process site galleryname stylename longside thumb making
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
@@ -85,16 +89,16 @@ set curnumb=%curnumb:~-2%
 call :calcshortside "%curfile%" "%longside%"
 call :border "%longside%" "%orientation%"
 @call :funcdebugger %~0 "off" "[restart echo after calls]"
-set filename=%galleryname%\gallery-%galleryname%_%curnumb%%thumb%.jpg
+set filename=gallery-%galleryname%_%curnumb%%thumb%.jpg
 if defined thumb (
-  echo if defined fblevel4  echo "%imconvert%" "%picdir%\%curfile%" %thubmoptions% "%outpath%\%filename%" > "%kigpath%\makejpg.cmd"
-  echo echo "%imconvert%" "%picdir%\%curfile%" %thumboptions% "%outpath%\%filename%"^>^> "%logfile%" .> "%kigpath%\makejpg.cmd"
-  echo "%imconvert%" "%picdir%\%curfile%" %thumboptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+  echo if defined fblevel5  echo "%imconvert%" "%picpath%\%curfile%" %thubmoptions% "%outpath%\%filename%" > "%kigpath%\makejpg.cmd"
+  echo echo "%imconvert%" "%picpath%\%curfile%" %thumboptions% "%outpath%\%filename%"^>^> "%logfile%" .> "%kigpath%\makejpg.cmd"
+  echo "%imconvert%" "%picpath%\%curfile%" %thumboptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
 
 ) else (
-  echo if defined fblevel4  echo "%imconvert%" "%picdir%\%curfile%" %largeoptions% "%outpath%\%filename%"  > "%kigpath%\makejpg.cmd"
-  echo echo "%imconvert%" "%picdir%\%curfile%" %largeoptions% "%outpath%\%filename%" ^>^> "%logfile%" >> "%kigpath%\makejpg.cmd"
-  echo "%imconvert%" "%picdir%\%curfile%" %largeoptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+  echo if defined fblevel5  echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%"  > "%kigpath%\makejpg.cmd"
+  echo echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%" ^>^> "%logfile%" >> "%kigpath%\makejpg.cmd"
+  echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
 )
 call "%kigpath%\makejpg.cmd"
 if defined fblevel1 (
@@ -114,16 +118,19 @@ goto :eof
 set lside=%~1
 if "%borderposition%" == "inside" (
   set border=0
+  set adjust=0
 ) else (
   if defined thumb (
     set border=%thumbborder%
+    set adjust=%thumbadjust%
   ) else (
     set border=%largeborder%
+    set adjust=%largeadjust%
   )
 )
-set /A newlongside=%lside%-(%border%*2)
+set /A newlongside=%lside%-(%border%*2)+%adjust%
 set /A newlongplusborderside=%lside%+(%border%*2)
-set /A newshortside=((%lside%*%inshort%)/%inlong%)-(%border%*2)
+set /A newshortside=((%lside%*%inshort%)/%inlong%)-(%border%*2)+%adjust%
 set /A newshortnoborderside=((%lside%*%inshort%)/%inlong%)
 set /A newshortplusborderside=((%lside%*%inshort%)/%inlong%)+(%border%*2)
 set resize=%newlongside%x%newshortside%
@@ -140,10 +147,10 @@ goto :eof
 :: lside
 :: border
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6 %~7 %~8
-set pic=%picdir%\%~1
+set pic=%picpath%\%~1
 if not defined border set border=0 
-"%imidentify%" -format %%wx%%hx%%[orientation] "%pic%" >picspecs.txt
-for /F "delims=x tokens=1-3" %%w in (picspecs.txt) do set inlong=%%w& set inshort=%%x& set orientation=%%y
+"%imidentify%" -format %%wx%%hx%%[orientation] "%pic%" > %picspecs%
+for /F "delims=x tokens=1-3" %%w in (%picspecs%) do set inlong=%%w& set inshort=%%x& set orientation=%%y
 set varset=pic inlong inshort orientation
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
@@ -218,56 +225,57 @@ goto :eof
 :: Required parameters:
 :: list - a filename with name=value on each line of the file
 set list=%~1
-FOR /F "eol=[ delims== tokens=1,2" %%s IN (%list%) DO (
-    set %%s=%%t
-  )
+FOR /F "eol=[ delims== tokens=1,2" %%s IN (%list%) DO set %%s=%%t
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
 
 :setup
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 rem the following shoud not need editing
+call :detectdateformat
+call :date
+call :time
 set fatal=
 set bordercolor=
 set kigpath=C:\Programs\kig
 set kigprogramdata=C:\ProgramData\kig
-if not defined remotepath (set picdir=%cd%) else (set picdir=%remotepath%)
-if not defined remotepath (set outpath=%cd%\gallery) else (set outpath=%remotepath%\gallery)
+set transferini=%kigprogramdata%\transfer.ini
+set logfile=%kigprogramdata%\kig_%curdate%.log
+set kigini=%kigprogramdata%\kig.ini
 set userpref=%kigprogramdata%\user-pref.ini
+set picspecs=%kigprogramdata%\picspecs.txt
 set imconvert=%kigpath%\imagemagick\convert.exe
 set imidentify=%kigpath%\imagemagick\identify.exe
 if not exist "%imconvert%" echo %imconvert% was not found.&echo Only the HTML will be created.&echo Please install ImageMagick and add path to user-pref.ini. &set fatal=true
 set equal10===========
-rem create outpath if needed
-call :checkdir "%outpath%"
-call :detectdateformat
-call :date
-call :time
-set logfile=%kigprogramdata%\kig_%curdate%.log
 echo :: %curdate% %curhh_mm% kig %site% %galleryname% %style% %usercolor% >> "%logfile%"
-set varset=kig outpath userpref
+set varset=kig transferini userpref logfile userpref picspecs im
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
 
 :uifallback
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 rem make sure variables are set
-if not defined checkcmdline (
-  if defined usersite set site=%usersite%
-  if defined userstyle set style=%userstyle%
-  if defined usergalleryname set galleryname=%usergalleryname%
-  if defined usertbordercolor set bordercolor=%usertbordercolor%
+
+if defined usersite set site=%usersite%
+if defined userstyle set style=%userstyle%
+if defined usergalleryname set galleryname=%usergalleryname%
+if defined userpicpath set picpath=%userpicpath%
+if defined defaultbordercolor set bordercolor=%defaultbordercolor%
+if defined userbordercolor set bordercolor=%usertbordercolor%
+if defined usercolor set bordercolor=%usercolor%
+if not exist "%transferini%" (
+  if not defined site echo Usage with parameters: kig iso_site_code gallery_id style_number [border_color] &echo.
+  if not defined site echo You must specify a Project code.&set /P site=Enter Project code or leave blank for "%defaultsite%": 
+  if not defined galleryname echo How do you want to distinguish this gallery from other galleries?&set /P galleryname=Gallery name or code: 
+  if not defined style call :stylelist
+  if not defined style echo What style do you want for the pictures?&set /P style=Choose style from the list above. Blank = %defaultstyle%: 
+  if not defined checkcmdline if not defined bordercolor echo Do you want to specify a border color?&set /P usercolor=Enter a color word or leave blank for default color "%defaultbordercolor%": 
+  if not defined site set site=%defaultsite%
+  if not defined style set style=%defaultstyle%
+  if not defined galleryname set galleryname=%defaultgalleryname%
 )
-if not defined site echo Usage with parameters: kig iso_site_code gallery_id style_number [border_color] &echo.
-if not defined site echo You must specify a Project code.&set /P site=Enter Project code or leave blank for "%defaultsite%": 
-if not defined galleryname echo How do you want to distinguish this gallery from other galleries?&set /P galleryname=Gallery name or code: 
-if not defined style call :stylelist
-if not defined style echo What style do you want for the pictures?&set /P style=Choose style from the list above. Blank = %defaultstyle%: 
-if not defined checkcmdline if not defined defaultbordercolor echo Do you want to specify a border color?&set /P usercolor=Enter a color word or leave blank for default color "%defaultbordercolor%": 
-if not defined site set site=%defaultsite%
-if not defined style set style=%defaultstyle%
-if not defined galleryname set galleryname=%defaultgalleryname%
-set varset=site galleryname style usercolor
+set varset=site galleryname style picpath bordercolor usercolor
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
 
@@ -294,16 +302,17 @@ goto :eof
 set site=%~1
 set galleryname=%~2
 set making=HTML fragment
-set htmlout=%picdir%\gallery\%galleryname%\html.txt
-if exist "%htmlout%" del /Q gallery\%galleryname%\*.*
+set outpath=%picpath%\gallery\%galleryname%
+set htmlout=%outpath%\html.txt
+call :checkdir "%outpath%"
+if exist "%htmlout%" del /Q %outpath%\*.*
 echo ^<script type="text/javascript" src="/sites/default/files/gallery/imageGallery.js"^>^</script^> > "%htmlout%"
 echo ^<p^>About these photos^</p^> >> "%htmlout%"
 echo ^<div class="image-gallery"^> >> "%htmlout%"
-@call :funcdebugger %~0 off
 call :fileloop htmlwrite %site% %galleryname%
-@call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
+@call :funcdebugger %~0 "off"
 echo ^</div^> >> "%htmlout%"
-if exist "%htmlout%" echo made "%htmlout%"
+if exist "%htmlout%" echo made "html.txt"
 set varset=making htmlout
 @call :funcdebugger %~0 end  "%varset%"
 goto :eof
@@ -330,14 +339,27 @@ if "%debugfuncboundary%" == "on" (
 goto :eof
 
 :funcdebugger
-set func=%~1
-set debugval=%~2
-set list=%~3
-if "%debugval%" == "end" if defined echoon echo off
+@set func=%~1
+@set debugval=%~2
+@set list=%~3
+@if "%debugval%" == "end" if defined echoon echo off
 rem echo param::debugger "off" %~1 %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
-if defined fblevel2 if "%debugval%" == "off" echo ====== param:%func% %~3 %~4 %~5 %~6 %~7 %~8 %~9
-if defined fblevel3 if "%debugval%" == "end" echo ================== Exit report for %func% =======================
-if defined fblevel3 if "%debugval%" == "end" for /F "tokens=1-10 delims= " %%a IN ("%list%") DO (
+@if defined fblevel2 if "%debugval%" == "off" echo rem ====== param:%func% %~3 %~4 %~5 %~6 %~7 %~8 %~9 >> "%logfile%"
+@if defined fblevel3 if "%debugval%" == "end" echo                    End report for %func% ----------------------- >> "%logfile%"
+@if defined fblevel3 if "%debugval%" == "end" for /F "tokens=1-10 delims= " %%a IN ("%list%") DO (
+  if "%%a" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%a') DO echo rem %%m>> "%logfile%" 
+  if "%%b" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%b') DO echo rem %%m>> "%logfile%" 
+  if "%%c" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%c') DO echo rem %%m>> "%logfile%" 
+  if "%%d" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%d') DO echo rem %%m>> "%logfile%" 
+  if "%%e" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%e') DO echo rem %%m>> "%logfile%" 
+  if "%%f" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%f') DO echo rem %%m>> "%logfile%" 
+  if "%%g" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%g') DO echo rem %%m>> "%logfile%" 
+  if "%%h" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%h') DO echo rem %%m>> "%logfile%" 
+  if "%%i" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%i') DO echo rem %%m>> "%logfile%" 
+  if "%%j" neq "" for /F "tokens=1 delims=/" %%m IN ('set %%j') DO echo rem %%m>> "%logfile%" 
+  echo.>> "%logfile%" 
+)
+@if defined fblevel4 if "%debugval%" == "end" for /F "tokens=1-10 delims= " %%a IN ("%list%") DO (
   if "%%a" neq "" set %%a
   if "%%b" neq "" set %%b
   if "%%c" neq "" set %%c
@@ -350,7 +372,8 @@ if defined fblevel3 if "%debugval%" == "end" for /F "tokens=1-10 delims= " %%a I
   if "%%j" neq "" set %%j
   echo.
 )
-if "%debugval%" == "on" echo on & set echoon=on
+@if defined fblevel3 if "%debugval%" == "end" echo                    Exit %func% ======================= >> "%logfile%"
+@if "%debugval%" == "on" echo on & set echoon=on
 @goto :eof
  
 :comparedate
@@ -383,9 +406,7 @@ goto :eof
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
 set dir=%~1
 if not defined dir echo missing required directory parameter & goto :eof
-if not exist "%dir%" (
-    mkdir "%dir%"
-)
+if not exist "%dir%" ( mkdir "%dir%" ) >> "%logfile%"
 set varset=dir
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
