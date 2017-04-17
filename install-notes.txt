@@ -1,8 +1,6 @@
-Installation notes for install-kig.cmd
+Installation notes
 ========================================
 
-Right click on the install-kig.cmd file and select "Run as administrator"
+Run kig installer that is downloadable from the latest release in this project.
 
-If you have Irfanview and FastStone Photo Resizer installed it should finish with no warning messages.
-
-It can be reinstalled to update.
+If you have an pre-kig3 then just rename the old folers or delete them. Otherwise use the uninstaller and then reinstall.

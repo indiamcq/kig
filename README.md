@@ -1,11 +1,21 @@
 # KIG  version 3
-## K Image Gallery tool [Installation](#instal) and [Usage](#usage)
 
-KIG is a Windows command line tool.
+## K Image Gallery maker 
 
-KIG makes the HTML code for you and also resizes the file to both thumbnail and full size. It uses a full installation of ImageMagic for image processing. It has 8 built in styles but can be extended with may more styles. 
+[Installation](#instal) and [Usage](#usage)
 
-### <a name="usage"></a>How to use
+KIG is a Windows command line tool. As of version 3 it also has a GUI.
+
+KIG makes the HTML code for you and also resizes the file to both thumbnail and full size. It uses an included version of ImageMagic for image processing. It has 8 built in styles but can be extended with may more styles. 
+
+### How to use the Graphical User Interface
+
+Start the kig-app from your start menu. Choose the folder where your pictures are stored. Then enter your K project code. Then enter your gallery name. As an option for some border types you can enter a border color. The default is white. Then select the style of border you want to create and click the type you want created.
+
+A notepad will open with the HTML you need to be pasted in. Also an Explorer window will open showing you the newly created images in both thumb and full size.
+
+### <a name="usage"></a>How to use command line tool
+
 Open a command prompt at the folder where the gallery photos resides on your computer. (To open a command prompt at the folder, select the folder with the mouse, then hold down shift and right mouse click and select **Open command window here.**)
 
 #### Option 1 type just `kig` and press *[enter]*
@@ -14,7 +24,7 @@ Type in `kig` in the command window and answer the question prompts.
 
 ##### Example: Sample of output from typing `kig`
 ---
-````
+```
 C:\images-for-gallery>kig
 
 Making HTML and resized photos and thumbnails for K Image gallery.
@@ -38,19 +48,16 @@ Available style numbers and description:
           Note: Enter only numbers.
 What style do you want for the pictures?
 Choose theme number from the list above Blank = 1: 1
-What is the project number?
-Enter number or leave blank for site code: 44
-========== Making HTML fragment ===============================================
-========== Making JPG_thumb files with solid white border =====================
-made g1\gallery-g1_01_thumb.jpg
-made g1\gallery-g1_02_thumb.jpg
-========== Making JPG files with solid white border ===========================
-made g1\gallery-g1_01.jpg
-made g1\gallery-g1_02.jpg
-Finished!
-````
----
 
+made html.txt
+made gallery-river_01_thumb.jpg
+made gallery-river_02_thumb.jpg
+made gallery-river_01.jpg
+made gallery-river_02.jpg
+Finished!
+```
+---
+                             
 #### Option 2 type in all parameters `kig xxx river 1 red`
 
 The full command line `kig` `iso_site_code` `gallery_id` `style_number` [`site_number` or `m` or `p`] and annotated below. 
@@ -87,11 +94,12 @@ C:\path\sample>kig xxx river 1
                               v3
         Available from: https://github.com/indiamcq/kig
 
-========== Making HTML fragment ===============================================
-========== Making JPG_thumb files with solid white border =====================
-made g1\gallery-g1_01_thumb.jpg
-made g1\gallery-g1_02_thumb.jpg
-========== Making JPG files with solid white border ===========================
+made html.txt
+made gallery-river_01_thumb.jpg
+made gallery-river_02_thumb.jpg
+made gallery-river_01.jpg
+made gallery-river_02.jpg
+Finished!
 ```
 ---
 
@@ -123,21 +131,10 @@ src="/sites/default/files/media/xxx/gallery-river_04_thumb.jpg" style="width: 21
 ---
 
 
-### <a name="instal"></a>Installation using install-kig.cmd
+### <a name="instal"></a>Installation 
 
-1. Download the trunk.zip file from [here](https://github.com/indiamcq/kig/archive/master.zip) or on the right hand side of  this page https://github.com/indiamcq/kig
-2. Unzip the trunk.zip
-3. Right click on the install-kig.cmd file and select "Run as administrator"
+1. Download the latest release from https://github.com/indiamcq/kig/releases
 
-  ![Run as Administrator](photos/RunAsAdmin.GIF)
+2. Run the kig-installer
 
-4. Click Yes to the User Account Control.
-
-  ![Run as Administrator](photos/UserAccountControl.GIF)
-
-You need to instal ImageMagic. 
-Without Irfanview the HTML will still be generated but no files resized. While FastStone Photo Resizer is only used in style 0.
-
-
-### Reinstallation
-Simply rerun the installer by double clicking the installer. Reinstall does not need the "Run as Administrator" option.
+3. Look in you start menu for kig and kig-app.
