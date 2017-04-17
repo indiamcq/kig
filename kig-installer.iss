@@ -21,13 +21,12 @@ Name: "C:\ProgramData\kig" ; Permissions: everyone-full
 [Files]
 Source: "files\kig-app.hta"; DestDir: "{app}"
 Source: "files\kig.cmd"; DestDir: "{app}"
-Source: "files\kigg.cmd"; DestDir: "{app}"
 Source: "files\kig.ico"; DestDir: "{app}"
 Source: "D:\All-SIL-Publishing\github\kig\branches\kig3\photos\*.GIF"; DestDir: "{app}\photos"
 Source: "files\ProgramData\*.ini"; DestDir: "C:\ProgramData\kig"
 Source: "files\thumb\*.jpg"; DestDir: "{app}\thumb"
-Source: "Readme.md"; DestDir: "{app}"; Flags: isreadme
-Source: "files\kig-readme.html"; DestDir: "{app}"
+Source: "Readme.md"; DestDir: "{app}"
+Source: "files\kig-readme.html"; DestDir: "{app}"; Flags: isreadme
 Source: "files\kig-readme.pdf"; DestDir: "{app}"
 Source: "files\imagemagick\*.exe"; DestDir: "{app}\imagemagick"
 Source: "files\imagemagick\*.txt"; DestDir: "{app}\imagemagick"
