@@ -1,4 +1,5 @@
 @echo off
+rem version 3.3
 if "%2" == "debug" echo on
 rem get parameters if passed
 set site=%1
@@ -28,30 +29,35 @@ if exist "%transferini%" (call :iniread "%transferini%") else (call :iniread "%u
 call :uifallback
 call :stylecheck
 if defined fatal exit /b
+rem create html file
 call :html %site% %galleryname%
-if "%bordercolor%" neq "html" call :style %style% %site% %galleryname% %bordercolor%
+call :getstyle %style% %site% %galleryname% %bordercolor%
+rem make thumbnails
+set imoptions=%thumboptions%
+if "%bordercolor%" neq "html" call :fileloop image "%site%" "%galleryname%" "%stylename%" "%thumbside%" "_thumb" 
+rem make large images
+set imoptions=%largeoptions%
+if "%bordercolor%" neq "html" call :fileloop image "%site%" "%galleryname%" "%stylename%" "%largeside%" 
 echo Finished!
+if defined fblevel0 pause
 start notepad "%htmlout%"
 if exist "%transferini%" start explorer "%outpath%"
-if defined pauseatend %pauseatend%
 if exist "%transferini%" del "%transferini%"
+set varset=style site galleryname bordercolor stylename border position thumboptions largeoptions
 @call :funcdebugger kig-main end "%varset%"
 goto :eof
 
-:style
+:getstyle
 @call :funcdebugger %~0 "off" %~1 %~2 %~3 %~4 %~5 %~6
 set style=%~1
 set site=%~2
 set galleryname=%~3
 set bordercolor=%~4
 call :iniread "%kigprogramdata%\style%style%.ini"
+echo :: style: %stylename% >> "%logfile%"
 if defined defaultbordercolor set bordercolor=%defaultbordercolor%
 if defined userbordercolor set bordercolor=%userbordercolor%
 if defined usercolor set bordercolor=%usercolor%
-set imoptions=%thumboptions%
-call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%thumbside%" "_thumb" 
-set imoptions=%largeoptions%
-call :fileloop jpg "%site%" "%galleryname%" "%stylename%" "%largeside%" 
 set varset=style site galleryname bordercolor thumboptions largeoptions
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
@@ -66,16 +72,16 @@ set stylename=%~4
 set longside=%~5
 set thumb=%~6
 rem get the style and size params
-if "%process%" == "jpg" set making=%equal10% Making JPG%thumb% files with %stylename% %bordercolor% border %equal10%%equal10%%equal10%%equal10%%equal10%
+if "%process%" == "image" set making=%equal10% Making JPG%thumb% files with %stylename% %bordercolor% border %equal10%%equal10%%equal10%%equal10%%equal10%
 if "%process%" == "htmlwrite" set making=%equal10% Making HTML fragment %equal10%%equal10%%equal10%%equal10%%equal10%
 if defined level2 echo %making:~0,79%
 set numb=
-FOR /F " delims=" %%s IN ('dir /b %picpath%\*.jpg') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
+FOR /F " delims=" %%s IN ('dir /b %picpath%\*.%inputimagetype%') DO call :%process% "%%s" "%site%" "%galleryname%" "%stylename%" "%longside%"
 set varset=process site galleryname stylename longside thumb making
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
 
-:jpg
+:image
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6 %~7 %~8
 set curfile=%~1
 set site=%~2
@@ -86,21 +92,25 @@ set longside=%~5
 set /a numb+=1
 set curnumb=0%numb%
 set curnumb=%curnumb:~-2%
-call :calcshortside "%curfile%" "%longside%"
+rem get image metadata
+call :imagemeta "%curfile%"
+rem call :calcshortside "%curfile%" "%longside%"
 call :border "%longside%" "%orientation%"
+rem do border calculations
 @call :funcdebugger %~0 "off" "[restart echo after calls]"
-set filename=gallery-%galleryname%_%curnumb%%thumb%.jpg
+set filename=gallery-%galleryname%_%curnumb%%thumb%.%inputimagetype%
+echo rem auto generated makeimage.cmd > "%kigpath%\makeimage.cmd"
 if defined thumb (
-  echo if defined fblevel5  echo "%imconvert%" "%picpath%\%curfile%" %thubmoptions% "%outpath%\%filename%" > "%kigpath%\makejpg.cmd"
-  echo echo "%imconvert%" "%picpath%\%curfile%" %thumboptions% "%outpath%\%filename%"^>^> "%logfile%" .> "%kigpath%\makejpg.cmd"
-  echo "%imconvert%" "%picpath%\%curfile%" %thumboptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+  echo if defined fblevel5  echo "%imconvert%" "%picpath%\%curfile%" %thubmoptions% "%outpath%\%filename%" >> "%kigpath%\makeimage.cmd"
+  echo echo "%imconvert%" "%picpath%\%curfile%" %thumboptions% "%outpath%\%filename%"^>^> "%logfile%" .>> "%kigpath%\makeimage.cmd"
+  echo "%imconvert%" "%picpath%\%curfile%" %thumboptions% "%outpath%\%filename%" >> "%kigpath%\makeimage.cmd"
 
 ) else (
-  echo if defined fblevel5  echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%"  > "%kigpath%\makejpg.cmd"
-  echo echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%" ^>^> "%logfile%" >> "%kigpath%\makejpg.cmd"
-  echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%" >> "%kigpath%\makejpg.cmd"
+  echo if defined fblevel5  echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%"  >> "%kigpath%\makeimage.cmd"
+  echo echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%" ^>^> "%logfile%" >> "%kigpath%\makeimage.cmd"
+  echo "%imconvert%" "%picpath%\%curfile%" %largeoptions% "%outpath%\%filename%" >> "%kigpath%\makeimage.cmd"
 )
-call "%kigpath%\makejpg.cmd"
+call "%kigpath%\makeimage.cmd"
 if defined fblevel1 (
   if exist "%outpath%\%filename%" (
     echo made %filename% 
@@ -115,7 +125,7 @@ goto :eof
 
 :border
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
-set lside=%~1
+set longside=%~1
 if "%borderposition%" == "inside" (
   set border=0
   set adjust=0
@@ -128,24 +138,52 @@ if "%borderposition%" == "inside" (
     set adjust=%largeadjust%
   )
 )
-set /A newlongside=%lside%-(%border%*2)+%adjust%
-set /A newlongplusborderside=%lside%+(%border%*2)
-set /A newshortside=((%lside%*%inshort%)/%inlong%)-(%border%*2)+%adjust%
-set /A newshortnoborderside=((%lside%*%inshort%)/%inlong%)
-set /A newshortplusborderside=((%lside%*%inshort%)/%inlong%)+(%border%*2)
-set resize=%newlongside%x%newshortside%
-set fullsize=%lside%x%newshortnoborderside%
-set resizeaddborder=%newlongplusborderside%x%newshortplusborderside%
-set varset=lside newshortside newlongside resize fullsize
+rem With border outside variables
+set /A newlongside=%longside%-%border%-%border%+%adjust%
+
+rem resize is used for all outside borders
+set resize=%newlongside%x%newlongside%
+rem fullsize is used for all inside borders
+set fullsize=%longside%x%longside%
+set varset=longside newlongside resize fullsize
 @call :funcdebugger %~0 end "%varset%"
 goto :eof
 
-:calcshortside
+:imagemeta
 :: Description: Get the short side of picture
 :: Required parameters:
 :: pic
 :: lside
 :: border
+@call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6 %~7 %~8
+set pic=%picpath%\%~1
+if not defined border set border=0 
+"%imidentify%" -format %%wx%%hx%%[orientation] "%pic%" > %picspecs%
+for /F "delims=x tokens=1-3" %%w in (%picspecs%) do set inlong=%%w& set inshort=%%x& set orientation=%%y
+rem for /F "usebackq delims=x tokens=1-3" %%w in (`"%imidentify%" -format %%wx%%hx%%[orientation] "%pic%"`) do (
+rem   set inlong=%%w
+rem   set inshort=%%x
+rem   set orientation=%%y
+rem )
+call :div proportion %inlong% %inshort%
+if "%orientation%" == "TopLeft" (set longside=Landscape) else (set longside=Portrait)
+@if defined fblevel_2 echo        pic specs: %inlong% %inshort% %longside% %proportion%
+set varset=pic inlong inshort orientation
+@call :funcdebugger %~0 end "%varset%"
+goto :eof
+
+:round
+set decimal=%~1
+set varname=%~2
+for /F "delims=. tokens=1" %%n in ("%decimal%") do set %varname%=%%n
+@if defined fblevel_3 @set %varname%
+goto :eof
+
+
+:calcshortside
+:: Description: Get the short side of picture
+:: Required parameters:
+:: pic
 @call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6 %~7 %~8
 set pic=%picpath%\%~1
 if not defined border set border=0 
@@ -288,8 +326,8 @@ set galleryname=%~3
 set /a numb+=1
 set curnumb=0%numb%
 set curnumb=%curnumb:~-2%
-set largefilename=gallery-%galleryname%_%curnumb%.jpg
-set thumbfilename=gallery-%galleryname%_%curnumb%_thumb.jpg
+set largefilename=gallery-%galleryname%_%curnumb%.%outputimagetype%
+set thumbfilename=gallery-%galleryname%_%curnumb%_thumb.%outputimagetype%
 echo ^<a href="/sites/default/files/media/%site%/%largefilename%"^>^<img alt="photo %numb%" >> %htmlout%
 echo src="/sites/default/files/media/%site%/%thumbfilename%" style="width: 215px; height: 162px !important;"/^> >> %htmlout%
 echo ^&nbsp;^</a^> >> %htmlout%
@@ -490,7 +528,40 @@ echo           Note: Enter only numbers.
 goto :eof
 
 :stylewrite
-set numb=%~1
-if exist "%kigprogramdata%\style%numb%.ini" call :iniread "%kigprogramdata%\style%numb%.ini"
-if exist "%kigprogramdata%\style%numb%.ini" (  echo %numb% %stylename% border) else (  goto :eof)
+set stylenumb=%~1
+if exist "%kigprogramdata%\style%stylenumb%.ini" call :iniread "%kigprogramdata%\style%stylenumb%.ini"
+if exist "%kigprogramdata%\style%stylenumb%.ini" (  echo %stylenumb% %stylename% border) else (  goto :eof)
 goto :eof
+
+:div
+@call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
+set varname=%~1
+set first=%~2
+set second=%~3
+set round=%~4
+for /F %%w in ('lua div.lua %first% %second%') do set temp=%%w
+if defined round (
+  call :round %temp% %varname%
+) else (
+  set %varname%=%temp%
+)
+@if defined fblevel_3 set %varname%
+@call :funcdebugger %~0 end "%varset%"
+goto :eof
+
+:multiply
+@call :funcdebugger %~0 "off" %1 %2 %3 %4 %~5 %~6
+set varname=%~1
+set first=%~2
+set second=%~3
+set round=%~4
+for /F %%w in ('lua multiply.lua %first% %second%') do set temp=%%w
+if defined round (
+  call :round %temp% %varname%
+) else (
+  set %varname%=%temp%
+)
+@if defined fblevel_3 set %varname%
+@call :funcdebugger %~0 off "temp"
+goto :eof
+
